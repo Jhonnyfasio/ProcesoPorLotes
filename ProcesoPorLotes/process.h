@@ -9,6 +9,7 @@ private:
 	int id;
 	std::string operation;
 	int tme;
+	int tmeTrans;
 	int lote;
 	float result;
 
@@ -16,12 +17,14 @@ public:
 	int getId();
 	std::string getOperation();
 	int getTme();
+	int getTmeTrans();
 	int getLote();
 	float getResult();
 
 	void setId(const int& idX);
 	void setOperation(std::string& operationX);
 	void setTme(const int& tmeX);
+	void setTmeTrans(const int  tmeTransX);
 	void setLote(const int& loteX);
 	void setResult(const float& resultX);
 
@@ -38,6 +41,10 @@ std::string Process::getOperation() {
 
 int Process::getTme() {
 	return tme;
+}
+
+int Process::getTmeTrans() {
+	return tmeTrans;
 }
 
 int Process::getLote() {
@@ -58,6 +65,10 @@ void Process::setOperation(std::string& operationX) {
 
 void Process::setTme(const int& tmeX) {
 	tme = tmeX;
+}
+
+void Process::setTmeTrans(const int tmeTransX) {
+	tmeTrans = tmeTransX;
 }
 
 void Process::setLote(const int& loteX) {

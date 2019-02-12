@@ -28,6 +28,9 @@ namespace ProcesoPorLotes {
 		float generalResult = 0;
 		int counterId = 0;
 		int status = 0 ;
+		int y = 0;
+		bool statusBool = true;
+		int generalWatch = 0;
 		Collection<Process>* secondListData;
 		Collection<Process>* listData;
 		Collection<Process>* listAux = new Collection<Process>;
@@ -42,6 +45,9 @@ namespace ProcesoPorLotes {
 	private: System::Windows::Forms::Label^  labelTotalTime;
 	private: System::Windows::Forms::TextBox^  txtStatus;
 	private: System::Windows::Forms::Label^  label2;
+	private: System::Windows::Forms::Label^  label3;
+	private: System::Windows::Forms::Label^  label4;
+	private: System::Windows::Forms::Label^  labelWatch;
 	private: System::Windows::Forms::Label^  labelRestantTime;
 
 
@@ -89,12 +95,12 @@ namespace ProcesoPorLotes {
 
 
 
-	private: System::Windows::Forms::Button^  button2;
+
 	private: System::Windows::Forms::TextBox^  txtPending;
 	private: System::Windows::Forms::TextBox^  txtProcess;
 
 	private: System::Windows::Forms::TextBox^  txtFinished;
-	private: System::Windows::Forms::Button^  buttonProcess;
+
 	private: System::ComponentModel::IContainer^  components;
 
 	private:
@@ -114,11 +120,9 @@ namespace ProcesoPorLotes {
 			this->txtNProcess = (gcnew System::Windows::Forms::TextBox());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->btnAdd = (gcnew System::Windows::Forms::Button());
-			this->button2 = (gcnew System::Windows::Forms::Button());
 			this->txtPending = (gcnew System::Windows::Forms::TextBox());
 			this->txtProcess = (gcnew System::Windows::Forms::TextBox());
 			this->txtFinished = (gcnew System::Windows::Forms::TextBox());
-			this->buttonProcess = (gcnew System::Windows::Forms::Button());
 			this->label5 = (gcnew System::Windows::Forms::Label());
 			this->labelLote = (gcnew System::Windows::Forms::Label());
 			this->timer1 = (gcnew System::Windows::Forms::Timer(this->components));
@@ -129,6 +133,9 @@ namespace ProcesoPorLotes {
 			this->labelRestantTime = (gcnew System::Windows::Forms::Label());
 			this->txtStatus = (gcnew System::Windows::Forms::TextBox());
 			this->label2 = (gcnew System::Windows::Forms::Label());
+			this->label3 = (gcnew System::Windows::Forms::Label());
+			this->label4 = (gcnew System::Windows::Forms::Label());
+			this->labelWatch = (gcnew System::Windows::Forms::Label());
 			this->SuspendLayout();
 			// 
 			// txtNProcess
@@ -153,19 +160,9 @@ namespace ProcesoPorLotes {
 			this->btnAdd->Name = L"btnAdd";
 			this->btnAdd->Size = System::Drawing::Size(75, 23);
 			this->btnAdd->TabIndex = 8;
-			this->btnAdd->Text = L"Agregar";
+			this->btnAdd->Text = L"Empezar";
 			this->btnAdd->UseVisualStyleBackColor = true;
 			this->btnAdd->Click += gcnew System::EventHandler(this, &principalProcess::button1_Click);
-			// 
-			// button2
-			// 
-			this->button2->Location = System::Drawing::Point(264, 89);
-			this->button2->Name = L"button2";
-			this->button2->Size = System::Drawing::Size(75, 23);
-			this->button2->TabIndex = 9;
-			this->button2->Text = L"Limpiar";
-			this->button2->UseVisualStyleBackColor = true;
-			this->button2->Click += gcnew System::EventHandler(this, &principalProcess::button2_Click);
 			// 
 			// txtPending
 			// 
@@ -195,16 +192,6 @@ namespace ProcesoPorLotes {
 			this->txtFinished->Size = System::Drawing::Size(213, 322);
 			this->txtFinished->TabIndex = 12;
 			// 
-			// buttonProcess
-			// 
-			this->buttonProcess->Location = System::Drawing::Point(362, 162);
-			this->buttonProcess->Name = L"buttonProcess";
-			this->buttonProcess->Size = System::Drawing::Size(75, 23);
-			this->buttonProcess->TabIndex = 13;
-			this->buttonProcess->Text = L"Empezar";
-			this->buttonProcess->UseVisualStyleBackColor = true;
-			this->buttonProcess->Click += gcnew System::EventHandler(this, &principalProcess::buttonProcess_Click);
-			// 
 			// label5
 			// 
 			this->label5->AutoSize = true;
@@ -219,8 +206,9 @@ namespace ProcesoPorLotes {
 			this->labelLote->AutoSize = true;
 			this->labelLote->Location = System::Drawing::Point(112, 172);
 			this->labelLote->Name = L"labelLote";
-			this->labelLote->Size = System::Drawing::Size(0, 13);
+			this->labelLote->Size = System::Drawing::Size(13, 13);
 			this->labelLote->TabIndex = 15;
+			this->labelLote->Text = L"0";
 			// 
 			// timer1
 			// 
@@ -229,7 +217,7 @@ namespace ProcesoPorLotes {
 			// label7
 			// 
 			this->label7->AutoSize = true;
-			this->label7->Location = System::Drawing::Point(267, 291);
+			this->label7->Location = System::Drawing::Point(314, 291);
 			this->label7->Name = L"label7";
 			this->label7->Size = System::Drawing::Size(72, 13);
 			this->label7->TabIndex = 16;
@@ -238,7 +226,7 @@ namespace ProcesoPorLotes {
 			// label6
 			// 
 			this->label6->AutoSize = true;
-			this->label6->Location = System::Drawing::Point(248, 314);
+			this->label6->Location = System::Drawing::Point(295, 314);
 			this->label6->Name = L"label6";
 			this->label6->Size = System::Drawing::Size(91, 13);
 			this->label6->TabIndex = 17;
@@ -247,18 +235,20 @@ namespace ProcesoPorLotes {
 			// labelTotalTime
 			// 
 			this->labelTotalTime->AutoSize = true;
-			this->labelTotalTime->Location = System::Drawing::Point(359, 291);
+			this->labelTotalTime->Location = System::Drawing::Point(406, 291);
 			this->labelTotalTime->Name = L"labelTotalTime";
-			this->labelTotalTime->Size = System::Drawing::Size(0, 13);
+			this->labelTotalTime->Size = System::Drawing::Size(13, 13);
 			this->labelTotalTime->TabIndex = 18;
+			this->labelTotalTime->Text = L"0";
 			// 
 			// labelRestantTime
 			// 
 			this->labelRestantTime->AutoSize = true;
-			this->labelRestantTime->Location = System::Drawing::Point(365, 318);
+			this->labelRestantTime->Location = System::Drawing::Point(406, 314);
 			this->labelRestantTime->Name = L"labelRestantTime";
-			this->labelRestantTime->Size = System::Drawing::Size(0, 13);
+			this->labelRestantTime->Size = System::Drawing::Size(13, 13);
 			this->labelRestantTime->TabIndex = 19;
+			this->labelRestantTime->Text = L"0";
 			// 
 			// txtStatus
 			// 
@@ -277,24 +267,52 @@ namespace ProcesoPorLotes {
 			this->label2->TabIndex = 21;
 			this->label2->Text = L"Estado";
 			// 
+			// label3
+			// 
+			this->label3->AutoSize = true;
+			this->label3->Location = System::Drawing::Point(228, 188);
+			this->label3->Name = L"label3";
+			this->label3->Size = System::Drawing::Size(67, 13);
+			this->label3->TabIndex = 22;
+			this->label3->Text = L"Procesando:";
+			// 
+			// label4
+			// 
+			this->label4->AutoSize = true;
+			this->label4->Location = System::Drawing::Point(352, 172);
+			this->label4->Name = L"label4";
+			this->label4->Size = System::Drawing::Size(34, 13);
+			this->label4->TabIndex = 23;
+			this->label4->Text = L"Reloj:";
+			// 
+			// labelWatch
+			// 
+			this->labelWatch->AutoSize = true;
+			this->labelWatch->Location = System::Drawing::Point(406, 172);
+			this->labelWatch->Name = L"labelWatch";
+			this->labelWatch->Size = System::Drawing::Size(13, 13);
+			this->labelWatch->TabIndex = 24;
+			this->labelWatch->Text = L"0";
+			// 
 			// principalProcess
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(678, 349);
-			this->Controls->Add(this->label2);
-			this->Controls->Add(this->txtStatus);
+			this->Controls->Add(this->labelWatch);
+			this->Controls->Add(this->label4);
+			this->Controls->Add(this->label3);
 			this->Controls->Add(this->labelRestantTime);
 			this->Controls->Add(this->labelTotalTime);
+			this->Controls->Add(this->label2);
+			this->Controls->Add(this->txtStatus);
 			this->Controls->Add(this->label6);
 			this->Controls->Add(this->label7);
 			this->Controls->Add(this->labelLote);
 			this->Controls->Add(this->label5);
-			this->Controls->Add(this->buttonProcess);
 			this->Controls->Add(this->txtFinished);
 			this->Controls->Add(this->txtProcess);
 			this->Controls->Add(this->txtPending);
-			this->Controls->Add(this->button2);
 			this->Controls->Add(this->btnAdd);
 			this->Controls->Add(this->label1);
 			this->Controls->Add(this->txtNProcess);
@@ -313,29 +331,26 @@ namespace ProcesoPorLotes {
 		std::string aux, aux2, aux3;
 		int counterLocal = counter;
 		int loteLocal;
-		int auxInt, auxInt2, caracter;
+		int auxInt, auxInt2, auxInt3, caracter;
 
-		if (txtNProcess->Text->IsNullOrWhiteSpace(txtProcess->Text) || txtStatus->Text->IsNullOrWhiteSpace(txtStatus->Text))
+		if (txtNProcess->Text->IsNullOrWhiteSpace(txtNProcess->Text))
 		{
 			MessageBox::Show("Error, no puede haber campos vacíos");
 			return;
 		}
-	
+
 		marshalString(txtNProcess->Text, aux);
 		if ((auxInt = atoi(aux.c_str())) < 1) {
 			MessageBox::Show("Error, no se puede pedir menos de un lote");
 			return;
 		}
-		
+		srand(time(NULL));
 		for (int i = 0; i < auxInt; i++) {
+			//MessageBox::Show("Generando: "+ (i+1).ToString()+ "de: "+auxInt.ToString());
 			process.setId(i + 1);
+			//MessageBox::Show("Numer:" + time(NULL).ToString());
 
-			srand(time(NULL));
-
-			auxInt = rand() % 50;
-			auxInt2 = rand() % 50;
 			caracter = rand() % 5;
-
 			switch (caracter)
 			{
 			case 0:
@@ -357,34 +372,37 @@ namespace ProcesoPorLotes {
 				MessageBox::Show("Error en generación caracter");
 				break;
 			}
-			marshalString(auxInt.ToString(), aux2);
-			marshalString(auxInt2.ToString(), aux3);
-			aux = aux2 + aux + aux3;
+			do {
+				auxInt2 = rand() % 50;
+				auxInt3 = rand() % 50;			
+			} while (auxInt2 == 0 && (caracter == 4 || caracter == 3));
+
+			marshalString(auxInt2.ToString(), aux2);
+			marshalString(auxInt3.ToString(), aux3);
+			aux = aux2 + aux + aux3 + '\0';
 			process.setOperation(aux);
-
-			auxInt = generalResult;
-			process.setResult(auxInt);
-
-
-			process.setTme(rand() % 18 + 7);
+			automatonOperational(aux);
+			auxInt2 = generalResult;
+			process.setResult(auxInt2);
+			
+			process.setTme(rand() % 12 + 7);
+			process.setTmeTrans(0);
 
 			counter++;
 			if (counter > 3) {
 				lote++;
 				counter = 1;
 			}
-			labelLote->Text = lote.ToString();
-			loteLocal = lote;
+			labelLote->Text = (lote+1).ToString();
+			loteLocal = lote+1;
 			process.setLote(loteLocal);
 
 			listData->insertData(process);
 		}
-		
-		clearTxtBox();	
-	}
 
-	private: System::Void button2_Click(System::Object^  sender, System::EventArgs^  e) {
 		clearTxtBox();
+		btnAdd->Enabled = false;
+		executeProcessName();
 	}
 
 	void marshalString(String ^ s, std::string& os) {
@@ -503,42 +521,38 @@ namespace ProcesoPorLotes {
 			generalResult = result;
 			//MessageBox::Show("Resultado: " + generalResult.ToString());
 			return true;
-			}
+	}
 
-		void executeProcessName() {
-			Process process;
-			if (listData->isEmpty()) {
-				return;
-			}
-			txtPending->Text = "";
-			for (int i = 0; (i < 3 && !listData->isEmpty()); i++) {
-				process = listData->dequeue();
-				listAux->insertData(process);
-				txtPending->Text += "TME = " + process.getTme().ToString()+"\r\n";
-				
-			}
-			//txtPending->Text = "Lote en ejecución: " + process.getLote().ToString()+"\r\n"+txtPending->Text;
-			executeProcess();
+	void executeProcessName() {
+		Process process;
+		if (listData->isEmpty()) {
+			return;
 		}
+		txtPending->Text = "";
+		for (int i = 0; (i < 3 && !listData->isEmpty()); i++) {
+			process = listData->dequeue();
+			listAux->insertData(process);
+			txtPending->Text += "ID: " + process.getId() + "\r\nTME = " + (process.getTme()-process.getTmeTrans()).ToString() + "\r\n";
+		}
+		labelLote->Text = (lote - actualLote).ToString();
+		//txtPending->Text = "Lote en ejecución: " + process.getLote().ToString()+"\r\n"+txtPending->Text;
+		executeProcess();
+	}
 
 		void executeProcess() {
 			Process process;
 			int tmeTotal = 0;
-			
+			int toErase, max;
 
 			if(!listAux->isEmpty()) {
-				//process = listData->retrieveData(listData->getFirst());
 				process = listAux->dequeue();
 				txtProcess->Text = "ID: " + process.getId().ToString() + "\r\n" +
 					"Operación: " + gcnew String(process.getOperation().c_str()) + "\r\n" + "TME: " + process.getTme().ToString();
 				
-				int toErase;
-				toErase = ("TME = " + process.getTme().ToString() + "\r\n")->Length;
+				toErase = ("ID: " + process.getId() + "\r\nTME = " + (process.getTme() - process.getTmeTrans()).ToString() + "\r\n")->Length;
 				
-				//MessageBox::Show("Lenght: " + toErase.ToString());
-				int max = txtPending->Text->Length - toErase;
+				max = txtPending->Text->Length - toErase;
 				txtPending->Text = txtPending->Text->Substring(toErase,max);
-				//MessageBox::Show("Pass");
 				timer1->Interval = 1000;
 				totalTime = process.getTme();
 				
@@ -554,77 +568,116 @@ namespace ProcesoPorLotes {
 		}
 
 
-private: System::Void principalProcess_Load(System::Object^  sender, System::EventArgs^  e) {
-}
+	private: System::Void principalProcess_Load(System::Object^  sender, System::EventArgs^  e) {
+	}
+
 	private: System::Void buttonProcess_Click(System::Object^  sender, System::EventArgs^  e) {
 		btnAdd->Enabled = false;
 		executeProcess();
 	}
 	
-			 int y = 0;
-private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e) {
-	Process process;
-	if (y <= totalTime) {
-		labelTotalTime->Text = y.ToString();
-		labelRestantTime->Text = (totalTime - y).ToString();
-		y++;
-	}
-	else {
-		labelTotalTime->Text = "0";
-		labelRestantTime->Text = "0";
-		y = 0;
-		timer1->Stop();
-		//executeProcess();
-		if (actualLote != generalProcess.getLote()) {
-			actualLote++;
-			txtFinished->Text += "------------------ Lote #" + actualLote.ToString() + " -------------------\r\n";
-			labelLote->Text = (lote - actualLote).ToString();
+	private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e) {
+		Process process;
+		y = generalProcess.getTmeTrans();
+		if (y <= totalTime) {
+			labelTotalTime->Text = y.ToString();
+			labelRestantTime->Text = (generalProcess.getTme() - y).ToString();
+			y++;
+			generalWatch++;
+			labelWatch->Text = generalWatch.ToString();
+			generalProcess.setTmeTrans((int)y);
 		}
+		else {
+			labelTotalTime->Text = "0";
+			labelRestantTime->Text = "0";
+			y = 0;
+			timer1->Stop();
+			//executeProcess();
+			if (actualLote == generalProcess.getLote()) {
+				actualLote++;
+				txtFinished->Text += "------------------ Lote #" + actualLote.ToString() + " -------------------\r\n";
+				labelLote->Text = (lote - actualLote).ToString();
+			}
 		
-		txtFinished->Text += "Número de programa: " + generalProcess.getId() +
-			"\r\nOperación: " + gcnew String(generalProcess.getOperation().c_str()) +
-			"\r\nResultado: " + generalProcess.getResult()+ "\r\n";
+			txtFinished->Text += "Número de programa: " + generalProcess.getId() +
+				"\r\nOperación: " + gcnew String(generalProcess.getOperation().c_str()) +
+				"\r\nResultado: " + generalProcess.getResult()+ "\r\n";
 
-		executeProcess();
-		
-	}
+			executeProcess();
+		}
 	}
 
-private: System::Void txtStatus_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e) {
-	e->KeyChar = Char::ToUpper(e->KeyChar);
-	Char ch = e->KeyChar;
-	//MessageBox::Show("Key = "+ ch);
-	e->Handled = true;
+	private: System::Void txtStatus_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e) {
+		std::string aux;
+		Char ch;
+		e->KeyChar = Char::ToUpper(e->KeyChar);
+		ch = e->KeyChar;
+		e->Handled = true;
+		//MessageBox::Show("Lote: " + lote.ToString()+ "Actual: " + actualLote.ToString());
+	if ((lote - actualLote) == 0) {
+		return;
+	}
+
 	if (ch == 'I') {
-		if (ch == 3) {
+		if (status == 3) {
 
 		}
 		else {
+			status = 1;
+			timer1->Stop();
+			
+			marshalString(labelTotalTime->Text, aux);
+			generalProcess.setTmeTrans(atoi(aux.c_str()));
+			txtPending->Text += "ID: " + generalProcess.getId() + "\r\nTME = " + (generalProcess.getTme() - generalProcess.getTmeTrans()).ToString() + "\r\n";
+			labelTotalTime->Text = "0";
+			labelRestantTime->Text = "0";
+			
+			listAux->insertData(generalProcess);
+
 			txtStatus->Clear();
 			e->Handled = false;
-			MessageBox::Show("I");
+			//MessageBox::Show("I");
+			executeProcess();
 		}
 	}
 	else if (ch == 'E') {
-		if (ch == 3) {
+		if (status == 3) {
 		}
 		else {
+			status = 2;
+			timer1->Stop();
+			labelTotalTime->Text = "0";
+			labelRestantTime->Text = "0";
+			generalProcess.setResult(0);
+			if (actualLote != generalProcess.getLote()) {
+				actualLote++;
+				txtFinished->Text += "------------------ Lote #" + actualLote.ToString() + " -------------------\r\n";
+			}
+			txtFinished->Text += "Número de programa: " + generalProcess.getId() + "\r\nEstado: ERROR\r\n";
 			txtStatus->Clear();
 			e->Handled = false;
-			MessageBox::Show("E");
+			//MessageBox::Show("E");
+			executeProcess();
 		}
 	}
 	else if (ch == 'P') {
-		txtStatus->Clear();
-		e->Handled = false;
-		MessageBox::Show("P");
+		if(status == 3){
+		}
+		else {
+			status = 3;
+			timer1->Stop();
+			txtStatus->Clear();
+			e->Handled = false;
+			//MessageBox::Show("P");
+		}
 	}
 	else if (ch == 'C') {
 		if (status == 3) {
-			// Continuar
+			status = 4;
+			timer1->Start();
 			txtStatus->Clear();
 			e->Handled = false;
-			MessageBox::Show("C");
+			//MessageBox::Show("C");
 		}
 		else {
 		
