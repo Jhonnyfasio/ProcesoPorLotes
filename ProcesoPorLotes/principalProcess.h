@@ -22,9 +22,8 @@ namespace ProcesoPorLotes {
 	{
 	public:
 		int lote = 1;
-		int counter = 0;
-		int totalTime;
 		int actualLote = 0;
+		int totalTime;
 		float generalResult = 0;
 		int counterId = 0;
 		int status = 0 ;
@@ -329,7 +328,7 @@ namespace ProcesoPorLotes {
 		Programer programer;
 		Process process;
 		std::string aux, aux2, aux3;
-		int counterLocal = counter;
+		int counterLocal = 0;
 		int loteLocal;
 		int auxInt, auxInt2, auxInt3, caracter;
 
@@ -388,17 +387,18 @@ namespace ProcesoPorLotes {
 			process.setTme(rand() % 12 + 7);
 			process.setTmeTrans(0);
 
-			counter++;
-			if (counter > 3) {
+			counterLocal++;
+			if (counterLocal > 3) {
 				lote++;
-				counter = 1;
+				counterLocal = 1;
 			}
-			labelLote->Text = (lote+1).ToString();
-			loteLocal = lote+1;
+			
+			loteLocal = lote;
 			process.setLote(loteLocal);
 
 			listData->insertData(process);
 		}
+		labelLote->Text = lote.ToString();
 
 		clearTxtBox();
 		btnAdd->Enabled = false;
@@ -526,6 +526,7 @@ namespace ProcesoPorLotes {
 	void executeProcessName() {
 		Process process;
 		if (listData->isEmpty()) {
+			labelLote->Text = "0";
 			return;
 		}
 		txtPending->Text = "";
@@ -570,11 +571,6 @@ namespace ProcesoPorLotes {
 
 	private: System::Void principalProcess_Load(System::Object^  sender, System::EventArgs^  e) {
 	}
-
-	private: System::Void buttonProcess_Click(System::Object^  sender, System::EventArgs^  e) {
-		btnAdd->Enabled = false;
-		executeProcess();
-	}
 	
 	private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e) {
 		Process process;
@@ -593,7 +589,7 @@ namespace ProcesoPorLotes {
 			y = 0;
 			timer1->Stop();
 			//executeProcess();
-			if (actualLote == generalProcess.getLote()) {
+			if (actualLote != generalProcess.getLote()) {
 				actualLote++;
 				txtFinished->Text += "------------------ Lote #" + actualLote.ToString() + " -------------------\r\n";
 				labelLote->Text = (lote - actualLote).ToString();
@@ -614,7 +610,7 @@ namespace ProcesoPorLotes {
 		ch = e->KeyChar;
 		e->Handled = true;
 		//MessageBox::Show("Lote: " + lote.ToString()+ "Actual: " + actualLote.ToString());
-	if ((lote - actualLote) == 0) {
+	if ((lote - actualLote) < 0) {
 		return;
 	}
 
@@ -649,6 +645,7 @@ namespace ProcesoPorLotes {
 			labelTotalTime->Text = "0";
 			labelRestantTime->Text = "0";
 			generalProcess.setResult(0);
+			//MessageBox::Show("Actual: "+ actualLote.ToString() + "Lote: " + generalProcess.getLote().ToString());
 			if (actualLote != generalProcess.getLote()) {
 				actualLote++;
 				txtFinished->Text += "------------------ Lote #" + actualLote.ToString() + " -------------------\r\n";
