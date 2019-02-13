@@ -325,7 +325,6 @@ namespace ProcesoPorLotes {
 #pragma endregion
 
 	private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
-		Programer programer;
 		Process process;
 		std::string aux, aux2, aux3;
 		int counterLocal = 0;
@@ -414,7 +413,7 @@ namespace ProcesoPorLotes {
 	public:
 
 		void clearTxtBox() {
-			txtProcess->Clear();
+			txtNProcess->Clear();
 			txtStatus->Clear();
 		}
 
@@ -525,11 +524,15 @@ namespace ProcesoPorLotes {
 
 	void executeProcessName() {
 		Process process;
+
+		txtPending->Text = "";
 		if (listData->isEmpty()) {
-			labelLote->Text = "0";
+			labelLote->Text = (lote - actualLote).ToString();
+			statusBool = false;
+			txtProcess->Clear();
+			clearTxtBox();
 			return;
 		}
-		txtPending->Text = "";
 		for (int i = 0; (i < 3 && !listData->isEmpty()); i++) {
 			process = listData->dequeue();
 			listAux->insertData(process);
@@ -590,9 +593,9 @@ namespace ProcesoPorLotes {
 			timer1->Stop();
 			//executeProcess();
 			if (actualLote != generalProcess.getLote()) {
+				labelLote->Text = (lote - actualLote).ToString();
 				actualLote++;
 				txtFinished->Text += "------------------ Lote #" + actualLote.ToString() + " -------------------\r\n";
-				labelLote->Text = (lote - actualLote).ToString();
 			}
 		
 			txtFinished->Text += "Número de programa: " + generalProcess.getId() +
@@ -610,7 +613,7 @@ namespace ProcesoPorLotes {
 		ch = e->KeyChar;
 		e->Handled = true;
 		//MessageBox::Show("Lote: " + lote.ToString()+ "Actual: " + actualLote.ToString());
-	if ((lote - actualLote) < 0) {
+	if (!statusBool) {
 		return;
 	}
 
@@ -647,6 +650,7 @@ namespace ProcesoPorLotes {
 			generalProcess.setResult(0);
 			//MessageBox::Show("Actual: "+ actualLote.ToString() + "Lote: " + generalProcess.getLote().ToString());
 			if (actualLote != generalProcess.getLote()) {
+				labelLote->Text = (lote - actualLote).ToString();
 				actualLote++;
 				txtFinished->Text += "------------------ Lote #" + actualLote.ToString() + " -------------------\r\n";
 			}
