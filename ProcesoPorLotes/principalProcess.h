@@ -536,9 +536,10 @@ namespace ProcesoPorLotes {
 		for (int i = 0; (i < 3 && !listData->isEmpty()); i++) {
 			process = listData->dequeue();
 			listAux->insertData(process);
-			txtPending->Text += "ID: " + process.getId() + "\r\nTME = " + (process.getTme()-process.getTmeTrans()).ToString() + "\r\n";
+			txtPending->Text += "ID: " + process.getId() + "\r\nTME = " + process.getTme() +"\r\n" +
+				"TR = " +(process.getTme()-process.getTmeTrans()).ToString() + "\r\n";
 		}
-		labelLote->Text = (lote - actualLote).ToString();
+		labelLote->Text = (lote - actualLote-1).ToString();
 		//txtPending->Text = "Lote en ejecución: " + process.getLote().ToString()+"\r\n"+txtPending->Text;
 		executeProcess();
 	}
@@ -553,7 +554,8 @@ namespace ProcesoPorLotes {
 				txtProcess->Text = "ID: " + process.getId().ToString() + "\r\n" +
 					"Operación: " + gcnew String(process.getOperation().c_str()) + "\r\n" + "TME: " + process.getTme().ToString();
 				
-				toErase = ("ID: " + process.getId() + "\r\nTME = " + (process.getTme() - process.getTmeTrans()).ToString() + "\r\n")->Length;
+				toErase = ("ID: " + process.getId() + "\r\nTME = " + process.getTme() + "\r\n" +
+					"TR = " + (process.getTme() - process.getTmeTrans()).ToString() + "\r\n")->Length;
 				
 				max = txtPending->Text->Length - toErase;
 				txtPending->Text = txtPending->Text->Substring(toErase,max);
@@ -593,7 +595,7 @@ namespace ProcesoPorLotes {
 			timer1->Stop();
 			//executeProcess();
 			if (actualLote != generalProcess.getLote()) {
-				labelLote->Text = (lote - actualLote).ToString();
+				labelLote->Text = (lote - actualLote-1).ToString();
 				actualLote++;
 				txtFinished->Text += "------------------ Lote #" + actualLote.ToString() + " -------------------\r\n";
 			}
@@ -627,7 +629,8 @@ namespace ProcesoPorLotes {
 			
 			marshalString(labelTotalTime->Text, aux);
 			generalProcess.setTmeTrans(atoi(aux.c_str()));
-			txtPending->Text += "ID: " + generalProcess.getId() + "\r\nTME = " + (generalProcess.getTme() - generalProcess.getTmeTrans()).ToString() + "\r\n";
+			txtPending->Text += "ID: " + generalProcess.getId() + "\r\nTME = " + generalProcess.getTme() + "\r\n" +
+				"TR = " + (generalProcess.getTme() - generalProcess.getTmeTrans()).ToString() + "\r\n";
 			labelTotalTime->Text = "0";
 			labelRestantTime->Text = "0";
 			
@@ -650,7 +653,7 @@ namespace ProcesoPorLotes {
 			generalProcess.setResult(0);
 			//MessageBox::Show("Actual: "+ actualLote.ToString() + "Lote: " + generalProcess.getLote().ToString());
 			if (actualLote != generalProcess.getLote()) {
-				labelLote->Text = (lote - actualLote).ToString();
+				labelLote->Text = (lote - actualLote-1).ToString();
 				actualLote++;
 				txtFinished->Text += "------------------ Lote #" + actualLote.ToString() + " -------------------\r\n";
 			}
