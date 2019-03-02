@@ -286,7 +286,11 @@ template<class T> class Collection {
                 }
             return acumulator;
             }
-        
+		
+		int getItemCounter() {
+			return itemCounter;
+			}
+
         Node* push(const T& e) {
             Node *aux;
             try {
@@ -297,7 +301,7 @@ template<class T> class Collection {
             catch(typename Node::Exception ex) {
                 throw Exception(ex.what());
                 }
-            
+
             aux->setNext(header);
             aux->setPrev(header->getPrev());
             
