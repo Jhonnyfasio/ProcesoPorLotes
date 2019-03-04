@@ -15,6 +15,7 @@ private:
 	int timeServicio;
 	int timeRespuesta;
 	int timeBlocked;
+	int timeEspera;
 	//int lote;
 	float result;
 
@@ -28,6 +29,7 @@ public:
 	int getTimeServicio();
 	int getTimeRespuesta();
 	int getTimeBlocked();
+	int getTimeEspera();
 	//int getLote();
 	float getResult();
 
@@ -40,6 +42,7 @@ public:
 	void setTimeServicio(const int timeX);
 	void setTimeRespuesta(const int timeX);
 	void setTimeBlocked(const int timeX);
+	void setTimeEspera(const int timeX);
 	//void setLote(const int& loteX);
 	void setResult(const float& resultX);
 
@@ -80,6 +83,10 @@ int Process::getTimeRespuesta(){
 
 int Process::getTimeBlocked() {
 	return timeBlocked;
+}
+
+int Process::getTimeEspera(){
+	return timeEspera;
 }
 /*int Process::getLote() {
 	return lote;
@@ -123,6 +130,10 @@ void Process::setTimeRespuesta(const int timeX) {
 
 void Process::setTimeBlocked(const int timeX) {
 	timeBlocked = timeX;
+}
+
+void Process::setTimeEspera(const int timeX) {
+	timeEspera = timeX;
 }
 /*void Process::setLote(const int& loteX) {
 	lote = loteX;

@@ -376,6 +376,8 @@ namespace ProcesoPorLotes {
 
 		}
 #pragma endregion
+	private: System::Void principalProcess_Load(System::Object^  sender, System::EventArgs^  e) {
+	}
 
 	private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
 		Process process;
@@ -436,7 +438,9 @@ namespace ProcesoPorLotes {
 			
 			process.setTme(rand() % 12 + 7);
 			process.setTimeTrans(0);
-			process.setTimeRespuesta(-1);
+			process.setTimeRespuesta(0);
+			process.setTimeBlocked(0);
+			process.setTimeEspera(0);
 
 			queueNews->insertData(process);
 		}
@@ -449,7 +453,7 @@ namespace ProcesoPorLotes {
 
 	public:
 
-		void clearTxtBox() {
+	void clearTxtBox() {
 			txtNProcess->Clear();
 			txtStatus->Clear();
 		}
@@ -585,75 +589,191 @@ namespace ProcesoPorLotes {
 		txtPending->Text = txtPending->Text->Substring(toErase, max);
 		totalTime = generalProcess.getTme();
 
-		txtProcess->Text = "ID: " + generalProcess.getId().ToString() + "\r\n T Trans: " + generalProcess.getTimeTrans().ToString() +
-			"\r\nT Trans: " + (generalProcess.getTme() - generalProcess.getTimeTrans()).ToString() +"\r\n";
+		txtProcess->Text = "ID: " + generalProcess.getId().ToString() + "\r\nTiempo Trans: " + generalProcess.getTimeTrans().ToString() +
+			"\r\nTiempo Restante: " + (generalProcess.getTme() - generalProcess.getTimeTrans()).ToString() +"\r\n";
 		timer1->Interval = 1000;
 		timer1->Start();	
 		}
-
-
-	private: System::Void principalProcess_Load(System::Object^  sender, System::EventArgs^  e) {
-	}
 	
 	private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e) {
+		Collection<Process>* queueAux = new Collection<Process>;
 		Process process;
 		int time;
+		int max, toErase;
 		std::string aux;
-		if (!queueBlocked->isEmpty() && queueBlocked->getFront().getTimeBlocked() == y) {
-			queueReady->insertData(queueBlocked->dequeue());
+		txtBlocked->Text = "";
+
+		generalProcess.setTimeServicio((int)y+1);
+
+		/*while (!queueReady->isEmpty()) {
+			process = queueReady->dequeue();
+			process.setTimeEspera(process.getTimeEspera()+1);
+			queueAux->insertData(process);
 		}
 
-		if (qGeneral == 1) {
-			marshalString(labelTotalTime->Text, aux);
-			generalProcess.setTimeTrans(atoi(aux.c_str()));
-			txtBlocked->Text += "ID: " + generalProcess.getId() + "\r\nTME = " + generalProcess.getTme().ToString() + "\r\n" +
-				"T Trans: " + (generalProcess.getTme() - generalProcess.getTimeTrans()).ToString() + "\r\n";
+		while(!queueAux->isEmpty()){
+			queueReady->insertData(queueAux->dequeue());
+		}*/
+
+		while(!queueBlocked->isEmpty()){
+			process = queueBlocked->dequeue();
+			queueAux->insertData(process);
+			txtBlocked->Text += "ID: " + process.getId().ToString() + "\r\nT Trans: " + (generalWatch+10 - process.getTimeBlocked()).ToString() + "\r\n";
+		}
+		
+		while(!queueAux->isEmpty()){
+			queueBlocked->insertData(queueAux->dequeue());
+		}
+		if (!queueBlocked->isEmpty()) {
+			//MessageBox::Show(queueBlocked->getFront().getTimeBlocked().ToString());
+		}
+		
+		if (!queueBlocked->isEmpty() && queueBlocked->getFront().getTimeBlocked() == generalWatch) {
+			queueReady->insertData(process = queueBlocked->dequeue());
+			
+			toErase = ("ID: " + process.getId().ToString() + "\r\nT Trans: " +  process.getTimeBlocked().ToString() + "\r\n")->Length;
+			//MessageBox::Show("A eliminar: " + toErase.ToString());
+			max = txtBlocked->Text->Length - toErase;
+			txtBlocked->Text = txtBlocked->Text->Substring(toErase, max);
+
+			txtPending->Text += "ID: " + process.getId() + "\r\nTME = " + process.getTme().ToString() + "\r\n" +
+				"T Rest: " + (process.getTme() - process.getTimeTrans()).ToString() + "\r\n";
+
+		}
+
+		if (!queueExecution->isEmpty() && qGeneral == 1) {
+			queueExecution->dequeue();
+			process = generalProcess;
+			txtProcess->Text = "";
+			//marshalString(labelTotalTime->Text, aux);
+			//process.setTimeTrans(atoi(aux.c_str()));
+			
 			labelTotalTime->Text = "0";
 			labelRestantTime->Text = "0";
 
-			generalProcess.setTimeBlocked(y + 10);
-			queueBlocked->insertData(generalProcess);
-			queueExecution->dequeue();
+			process.setTimeBlocked(generalWatch + 10);
+			queueBlocked->insertData(process);
+			txtBlocked->Text += "ID: " + process.getId() + "\r\nT Trans: " + (generalWatch + 10 - process.getTimeBlocked()).ToString() + "\r\n";
 
 			if (!queueReady->isEmpty()) {
 				generalProcess = queueReady->dequeue();
+				toErase = ("ID: " + generalProcess.getId() + "\r\nTME = " + generalProcess.getTme().ToString() + "\r\n" +
+					"T Rest: " + (generalProcess.getTme() - generalProcess.getTimeTrans()).ToString() + "\r\n")->Length;
+				max = txtPending->Text->Length - toErase;
+				txtPending->Text = txtPending->Text->Substring(toErase, max);
 
-				if (generalProcess.getTimeRespuesta() == -1) {
-					generalProcess.setTimeRespuesta(y);
+				if (generalProcess.getTimeRespuesta() == 0) {
+					generalProcess.setTimeRespuesta(generalWatch - generalProcess.getTimeLlegada()+1);
 				}
 				queueExecution->insertData(generalProcess);
+				txtProcess->Text = "ID: " + generalProcess.getId().ToString() + "\r\nTiempo Trans: " + generalProcess.getTimeTrans().ToString() +
+					"\r\nTiempo Restante: " + (generalProcess.getTme() - generalProcess.getTimeTrans()).ToString() + "\r\n";
 			}
 			else {
-				generalProcess.setTme(30);
+				generalProcess.setId(-1);
+				generalProcess.setTme(0);
 				generalProcess.setTimeTrans(0);
+				y = 0;
 				}
 			
 		}
-		y = generalProcess.getTimeTrans();
-		if (y <= generalProcess.getTme()) {
-			y++;
-			generalWatch++;
-			
-			labelTotalTime->Text = y.ToString();
-			labelRestantTime->Text = (generalProcess.getTme() - y).ToString();
-			labelWatch->Text = generalWatch.ToString();
-			generalProcess.setTimeTrans((int)y);
+		if (generalProcess.getId() == -1) {
+			labelTotalTime->Text = "";
+			labelRestantTime->Text = "";
 		}
-		else {
-			labelTotalTime->Text = "0";
-			labelRestantTime->Text = "0";
+		y = generalProcess.getTimeTrans();
+		if (generalProcess.getId() != -1 && y < generalProcess.getTme()) {
+			y++;
+		}
+		if((generalProcess.getId() != -1 && y >= generalProcess.getTme() || qGeneral == 2) && !queueExecution->isEmpty()) {
+			// labelTotalTime->Text = "0";
+			// labelRestantTime->Text = "0";
 			y = 0;
 			//timer1->Stop();
 
+			queueExecution->dequeue();
+			txtProcess->Text = "";
+			
+			generalProcess.setTimeFinalizacion(generalWatch); // En caso de fallo moverle a esto por retorno
 			time = (generalProcess.getTimeFinalizacion() - generalProcess.getTimeLlegada() - generalProcess.getTimeServicio());
 			txtFinished->Text += "Número de programa: " + generalProcess.getId() +
-				"\r\nOperación: " + gcnew String(generalProcess.getOperation().c_str()) +
-				"\r\nResultado: " + generalProcess.getResult() + "\r\n Tiempo de Llegada: " + generalProcess.getTimeLlegada() +
-				"\r\nTiempo de Finalizacion" + generalProcess.getTimeFinalizacion() + "\r\n Tiempo de Retorno: " +
-				(generalProcess.getTimeServicio() + "\r\nTiempo de Retorno: " + time + "\r\nTiempo de Respuesta: " + generalProcess.getTimeRespuesta()) +
-				"\r\nTiempo de Espera: " + generalProcess.getTimeRespuesta() + "\r\nTiempo de Servicio: " + generalProcess.getTimeServicio() + "\r\n"; 
+				"\r\nOperación: " + gcnew String(generalProcess.getOperation().c_str());
+			if (qGeneral == 2) {
+				txtFinished->Text += "\r\nResultado: ERROR";
+				}
+			else {
+				txtFinished->Text += "\r\nResultado: " + generalProcess.getResult();
+			}
+			time = (generalProcess.getTimeFinalizacion() - generalProcess.getTimeLlegada());
+			txtFinished->Text += "\r\n Tiempo de Llegada: " + generalProcess.getTimeLlegada() +
+				"\r\nTiempo de Finalizacion" + generalProcess.getTimeFinalizacion() + 
+				"\r\nTiempo de Retorno: " + time + 
+				"\r\nTiempo de Respuesta: " + generalProcess.getTimeRespuesta() +
+				"\r\nTiempo de Espera: " + (time - generalProcess.getTimeServicio()) + 
+				"\r\nTiempo de Servicio: " + generalProcess.getTimeServicio() + 
+				"\r\n---------------------------------\r\n"; 
+
+			if (!queueNews->isEmpty()) {
+				process = queueNews->dequeue();
+				process.setTimeLlegada(generalWatch+1);
+				queueReady->insertData(process);
+				txtPending->Text += "ID: " + process.getId() + "\r\nTME = " + process.getTme().ToString() + "\r\n" +
+					"T Rest: " + (process.getTme() - process.getTimeTrans()).ToString() + "\r\n";
+			}
+
+			if (!queueReady->isEmpty()) {
+				generalProcess = queueReady->dequeue();
+				y = generalProcess.getTimeTrans();
+
+				toErase = ("ID: " + generalProcess.getId() + "\r\nTME = " + generalProcess.getTme().ToString() + "\r\n" +
+					"T Rest: " + (generalProcess.getTme() - generalProcess.getTimeTrans()).ToString() + "\r\n")->Length;
+				max = txtPending->Text->Length - toErase;
+				txtPending->Text = txtPending->Text->Substring(toErase, max);
+
+				generalProcess.setTimeRespuesta(generalWatch - generalProcess.getTimeLlegada());
+
+				queueExecution->insertData(generalProcess);
+				txtProcess->Text = "ID: " + generalProcess.getId().ToString() + "\r\nTiempo Trans: " + generalProcess.getTimeTrans().ToString() +
+					"\r\nTiempo Restante: " + (generalProcess.getTme() - generalProcess.getTimeTrans()).ToString() + "\r\n";
+			}
+			else {
+				txtProcess->Text = "";
+				//timer1->Stop();
+				
+			}
 		}
 		qGeneral = 0;
+		generalWatch++;
+
+		if (queueExecution->isEmpty()) {
+			if(queueReady->isEmpty()){
+				if (queueNews->isEmpty()) {
+					if (queueBlocked->isEmpty()) {
+						timer1->Stop();
+						txtStatus->Enabled = false;
+						labelTotalTime->Text = "";
+						labelRestantTime->Text = "";
+					}
+				}
+			}
+			else {
+				generalProcess = queueReady->dequeue();
+				toErase = ("ID: " + generalProcess.getId() + "\r\nTME = " + generalProcess.getTme().ToString() + "\r\n" +
+					"T Rest: " + (generalProcess.getTme() - generalProcess.getTimeTrans()).ToString() + "\r\n")->Length;
+				max = txtPending->Text->Length - toErase;
+				txtPending->Text = txtPending->Text->Substring(toErase, max);
+
+				y = generalProcess.getTimeTrans();
+				queueExecution->insertData(generalProcess);
+				txtProcess->Text = "ID: " + generalProcess.getId().ToString() + "\r\nTiempo Trans: " + generalProcess.getTimeTrans().ToString() +
+					"\r\nTiempo Restante: " + (generalProcess.getTme() - generalProcess.getTimeTrans()).ToString() + "\r\n";
+			}
+		}
+		labelTotalTime->Text = y.ToString();
+		labelRestantTime->Text = (generalProcess.getTme() - y).ToString();
+		labelWatch->Text = generalWatch.ToString();
+		generalProcess.setTimeTrans((int)y);
+		
 	}
 
 	private: System::Void txtStatus_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e) {
@@ -687,18 +807,12 @@ namespace ProcesoPorLotes {
 		if (status == 3) {
 		}
 		else {
+			qGeneral = 2;
 			status = 2;
-			timer1->Stop();
-			labelTotalTime->Text = "0";
-			labelRestantTime->Text = "0";
 			generalProcess.setResult(0);
-			//MessageBox::Show("Actual: "+ actualLote.ToString() + "Lote: " + generalProcess.getLote().ToString());
 			
-			txtFinished->Text += "Número de programa: " + generalProcess.getId() + "\r\nEstado: ERROR\r\n";
 			txtStatus->Clear();
 			e->Handled = false;
-			//MessageBox::Show("E");
-			executeProcess();
 		}
 	}
 	else if (ch == 'P') {
