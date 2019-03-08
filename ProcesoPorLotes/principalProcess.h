@@ -795,6 +795,7 @@ namespace ProcesoPorLotes {
 			}
 		}
 		
+		labelTotalTime->Text = y.ToString();
 		labelRestantTime->Text = (generalProcess.getTme() - y).ToString();
 		labelWatch->Text = generalWatch.ToString();
 		qGeneral = 0;
