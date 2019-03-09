@@ -374,7 +374,7 @@ template<class T> class Collection {
             delete aux;
             
             //this->deleteData(this->getLast());
-            
+			itemCounter--;
             return r;
             }
 
@@ -391,6 +391,7 @@ template<class T> class Collection {
             aux->getNext()->setPrev(aux->getPrev());
 
             delete aux;
+			itemCounter--;
 
             return r;
             }

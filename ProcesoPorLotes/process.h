@@ -16,6 +16,7 @@ private:
 	int timeRespuesta;
 	int timeBlocked;
 	int timeEspera;
+	bool isError;
 	//int lote;
 	float result;
 
@@ -30,6 +31,7 @@ public:
 	int getTimeRespuesta();
 	int getTimeBlocked();
 	int getTimeEspera();
+	int getisError();
 	//int getLote();
 	float getResult();
 
@@ -43,6 +45,7 @@ public:
 	void setTimeRespuesta(const int timeX);
 	void setTimeBlocked(const int timeX);
 	void setTimeEspera(const int timeX);
+	void setIsError(const bool& isErrorX);
 	//void setLote(const int& loteX);
 	void setResult(const float& resultX);
 
@@ -87,6 +90,10 @@ int Process::getTimeBlocked() {
 
 int Process::getTimeEspera(){
 	return timeEspera;
+}
+
+int Process::getisError() {
+	return isError;
 }
 /*int Process::getLote() {
 	return lote;
@@ -134,6 +141,10 @@ void Process::setTimeBlocked(const int timeX) {
 
 void Process::setTimeEspera(const int timeX) {
 	timeEspera = timeX;
+}
+
+void Process::setIsError(const bool& isErrorX){
+	isError = isErrorX;
 }
 /*void Process::setLote(const int& loteX) {
 	lote = loteX;

@@ -35,6 +35,7 @@ namespace ProcesoPorLotes {
 		Collection<Process>* queueReady = new Collection<Process>;
 		Collection<Process>* queueExecution = new Collection<Process>;
 		Collection<Process>* queueBlocked = new Collection<Process>;
+		Collection<Process>* queueFinished = new Collection<Process>;
 
 	private: System::Windows::Forms::Label^  label5;
 	private: System::Windows::Forms::Label^  labelNews;
@@ -378,7 +379,9 @@ namespace ProcesoPorLotes {
 #pragma endregion
 	private: System::Void principalProcess_Load(System::Object^  sender, System::EventArgs^  e) {
 	}
-	int intPublic;
+	
+	int intPublic = 0, idFinal = 0 ;
+	
 	private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
 		Process process;
 		std::string aux, aux2, aux3;
@@ -392,67 +395,77 @@ namespace ProcesoPorLotes {
 
 		marshalString(txtNProcess->Text, aux);
 		if ((auxInt = atoi(aux.c_str())) < 1) {
-			MessageBox::Show("Error, no se puede pedir menos de un lote");
+			MessageBox::Show("Error, no se puede pedir menos de un proceso");
 			return;
 		}
 		srand(time(NULL));
 		for (int i = 0; i < auxInt; i++) {
-			//MessageBox::Show("Generando: "+ (i+1).ToString()+ "de: "+auxInt.ToString());
-			process.setId(i + 1);
-			//MessageBox::Show("Numer:" + time(NULL).ToString());
-
-			caracter = rand() % 5;
-			switch (caracter)
-			{
-			case 0:
-				aux = "+";
-				break;
-			case 1:
-				aux = "-";
-				break;
-			case 2:
-				aux = "*";
-				break;
-			case 3:
-				aux = "/";
-				break;
-			case 4:
-				aux = "%";
-				break;
-			default:
-				MessageBox::Show("Error en generación caracter");
-				break;
-			}
-			do {
-				auxInt2 = rand() % 50;
-				auxInt3 = rand() % 50;			
-			} while (auxInt2 == 0 && (caracter == 4 || caracter == 3));
-
-			marshalString(auxInt2.ToString(), aux2);
-			marshalString(auxInt3.ToString(), aux3);
-			aux = aux2 + aux + aux3 + '\0';
-			process.setOperation(aux);
-			automatonOperational(aux);
-			auxInt2 = generalResult;
-			process.setResult(auxInt2);
-			
-			process.setTme(rand() % 12 + 7);
-			process.setTimeTrans(0);
-			process.setTimeRespuesta(-1);
-			process.setTimeBlocked(0);
-			process.setTimeEspera(0);
-
-			queueNews->insertData(process);
+			chargeProcess(i+1);
 		}
+		idFinal = auxInt;
 		
-		
-		intPublic = auxInt;
+		//intPublic = auxInt;
 		clearTxtBox();
 		btnAdd->Enabled = false;
 		executeProcess();
 	}
 
 	public:
+
+	void chargeProcess(const int& idX) {
+		Process process;
+		int auxInt2, auxInt3, caracter;
+		std::string aux, aux2, aux3;
+
+		//MessageBox::Show("Generando: "+ (i+1).ToString()+ "de: "+auxInt.ToString());
+		process.setId(idX);
+		//MessageBox::Show("Numer:" + time(NULL).ToString());
+		intPublic++;
+
+		caracter = rand() % 5;
+		switch (caracter)
+		{
+		case 0:
+			aux = "+";
+			break;
+		case 1:
+			aux = "-";
+			break;
+		case 2:
+			aux = "*";
+			break;
+		case 3:
+			aux = "/";
+			break;
+		case 4:
+			aux = "%";
+			break;
+		default:
+			MessageBox::Show("Error en generación caracter");
+			break;
+		}
+		do {
+			auxInt2 = rand() % 50;
+			auxInt3 = rand() % 50;
+		} while (auxInt2 == 0 && (caracter == 4 || caracter == 3));
+
+		marshalString(auxInt2.ToString(), aux2);
+		marshalString(auxInt3.ToString(), aux3);
+		aux = aux2 + aux + aux3 + '\0';
+		process.setOperation(aux);
+		automatonOperational(aux);
+		auxInt2 = generalResult;
+		process.setResult(auxInt2);
+
+		process.setTme(rand() % 12 + 7);
+		process.setTimeTrans(0);
+		process.setTimeRespuesta(-1);
+		process.setTimeBlocked(0);
+		process.setTimeEspera(0);
+		process.setIsError(false);
+
+		queueNews->insertData(process);
+	}
 
 	void clearTxtBox() {
 			txtNProcess->Clear();
@@ -622,6 +635,17 @@ namespace ProcesoPorLotes {
 		labelRestantTime->Text = (generalProcess.getTme() - y).ToString();
 		labelWatch->Text = generalWatch.ToString();
 
+		while (!queueNews->isEmpty() && (queueReady->getItemCounter() + queueExecution->getItemCounter() + queueBlocked->getItemCounter()) < 3) {
+			process = queueNews->dequeue();
+			process.setTimeLlegada(generalWatch);
+			labelNews->Text = (--intPublic).ToString();
+
+			txtPending->Text += "ID: " + process.getId() + "\r\nTME = " + process.getTme().ToString() + "\r\n" +
+				"T Rest: " + (process.getTme() - process.getTimeTrans()).ToString() + "\r\n";
+
+			queueReady->insertData(process);
+		}
+
 		if ((generalProcess.getId() != -1 && (y >= generalProcess.getTme() || qGeneral == 2)) && !queueExecution->isEmpty()) {
 			std::string toConver;
 			int toConverInt;
@@ -633,7 +657,7 @@ namespace ProcesoPorLotes {
 
 			y = 0;
 
-			queueExecution->dequeue();
+			process = queueExecution->dequeue();
 			txtProcess->Text = "";
 
 			generalProcess.setTimeFinalizacion(generalWatch); // En caso de fallo moverle a esto por retorno
@@ -641,6 +665,7 @@ namespace ProcesoPorLotes {
 			txtFinished->Text += "Número de programa: " + generalProcess.getId() +
 				"\r\nOperación: " + gcnew String(generalProcess.getOperation().c_str());
 			if (qGeneral == 2) {
+				generalProcess.setIsError(true);
 				txtFinished->Text += "\r\nResultado: ERROR";
 			}
 			else {
@@ -653,7 +678,7 @@ namespace ProcesoPorLotes {
 				"\r\nTiempo de Respuesta: " + generalProcess.getTimeRespuesta() +
 				"\r\nTiempo de Espera: " + (time - generalProcess.getTimeServicio()).ToString() +
 				"\r\nTiempo de Servicio: " + generalProcess.getTimeServicio() +
-				"\r\n------------------------------------------------------------------\r\n";
+				"\r\n---------------------------------------------------------------\r\n";
 
 			if (!queueNews->isEmpty()) {
 				process = queueNews->dequeue();
@@ -717,6 +742,7 @@ namespace ProcesoPorLotes {
 		if (generalProcess.getId() == -1) {
 			labelTotalTime->Text = "0";
 			labelRestantTime->Text = "0";
+			//MessageBox::Show("Hi");
 		}
 		
 		y = generalProcess.getTimeTrans();
@@ -770,10 +796,7 @@ namespace ProcesoPorLotes {
 			if(queueReady->isEmpty()){
 				if (queueNews->isEmpty()) {
 					if (queueBlocked->isEmpty()) {
-						txtStatus->Enabled = false;
-						labelTotalTime->Text = "";
-						labelRestantTime->Text = "";
-						timer1->Stop();
+						generalProcess.setId(-1);
 					}
 				}
 			}
@@ -795,14 +818,17 @@ namespace ProcesoPorLotes {
 			}
 		}
 		
-		labelTotalTime->Text = y.ToString();
-		labelRestantTime->Text = (generalProcess.getTme() - y).ToString();
-		labelWatch->Text = generalWatch.ToString();
-		qGeneral = 0;
+		if (generalProcess.getId() != -1) {
+			labelTotalTime->Text = y.ToString();
+			labelRestantTime->Text = (generalProcess.getTme() - y).ToString();
+			labelWatch->Text = generalWatch.ToString();
+			qGeneral = 0;
+		}
+		
 	}
 
 	private: System::Void txtStatus_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e) {
-		int toErase, max;
+		int toErase, max, auxInt;
 		std::string aux;
 		Char ch;
 		e->KeyChar = Char::ToUpper(e->KeyChar);
@@ -864,6 +890,20 @@ namespace ProcesoPorLotes {
 		}
 		
 	}
+	else if (ch == 'N') {
+		if (status == 3) {
+		}
+		else {
+			qGeneral = 3;
+			status = 2;
+			auxInt = ++idFinal;
+			chargeProcess(auxInt);
+			labelNews->Text = (intPublic).ToString();
+			txtStatus->Clear();
+			e->Handled = false;
+			//MessageBox::Show("N");
+		}
+	}
 	else if (ch == 8) {
 		//MessageBox::Show("Erase");
 	}
@@ -871,6 +911,63 @@ namespace ProcesoPorLotes {
 
 	}
 }
+
+	void showBCP() { // Conitnuar BCP
+		Collection<Process>* queueAux = new Collection<Process>;
+		Process process;
+		int time;
+
+		while (!queueFinished->isEmpty()) {
+			queueAux->insertData(queueFinished->dequeue());
+		}
+		while (!queueAux->isEmpty()) {
+			queueFinished->insertData(process = queueAux->dequeue());
+			process = queueExecution->dequeue();
+			txtProcess->Text = "";
+
+			process.setTimeFinalizacion(generalWatch); // En caso de fallo moverle a esto por retorno
+			time = (generalProcess.getTimeFinalizacion() - generalProcess.getTimeLlegada() - generalProcess.getTimeServicio());
+			txtFinished->Text += "Número de programa: " + process.getId() +
+				"\r\nOperación: " + gcnew String(generalProcess.getOperation().c_str());
+			if (process.getisError()) {
+				txtFinished->Text += "\r\nResultado: ERROR";
+			}
+			else {
+				txtFinished->Text += "\r\nResultado: " + process.getResult();
+			}
+			time = (process.getTimeFinalizacion() - process.getTimeLlegada());
+			txtFinished->Text += "\r\n Tiempo de Llegada: " + process.getTimeLlegada() +
+				"\r\nTiempo de Finalizacion" + process.getTimeFinalizacion() +
+				"\r\nTiempo de Retorno: " + time +
+				"\r\nTiempo de Respuesta: " + process.getTimeRespuesta() +
+				"\r\nTiempo de Espera: " + (time - process.getTimeServicio()).ToString() +
+				"\r\nTiempo de Servicio: " + process.getTimeServicio() +
+				"\r\n------------------------------------------------------------------\r\n";
+		}
+
+		process = queueExecution->dequeue();
+		txtProcess->Text = "";
+
+		generalProcess.setTimeFinalizacion(generalWatch); // En caso de fallo moverle a esto por retorno
+		time = (generalProcess.getTimeFinalizacion() - generalProcess.getTimeLlegada() - generalProcess.getTimeServicio());
+		txtFinished->Text += "Número de programa: " + generalProcess.getId() +
+			"\r\nOperación: " + gcnew String(generalProcess.getOperation().c_str());
+		if (qGeneral == 2) {
+			generalProcess.setIsError(true);
+			txtFinished->Text += "\r\nResultado: ERROR";
+		}
+		else {
+			txtFinished->Text += "\r\nResultado: " + generalProcess.getResult();
+		}
+		time = (generalProcess.getTimeFinalizacion() - generalProcess.getTimeLlegada());
+		txtFinished->Text += "\r\n Tiempo de Llegada: " + generalProcess.getTimeLlegada() +
+			"\r\nTiempo de Finalizacion" + generalProcess.getTimeFinalizacion() +
+			"\r\nTiempo de Retorno: " + time +
+			"\r\nTiempo de Respuesta: " + generalProcess.getTimeRespuesta() +
+			"\r\nTiempo de Espera: " + (time - generalProcess.getTimeServicio()).ToString() +
+			"\r\nTiempo de Servicio: " + generalProcess.getTimeServicio() +
+			"\r\n------------------------------------------------------------------\r\n";
+	}
 
 	void marshalString(String ^ s, std::string& os) {
 		using namespace Runtime::InteropServices;
