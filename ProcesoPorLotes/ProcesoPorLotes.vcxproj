@@ -105,6 +105,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies />
+      <SubSystem>NotSet</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -133,9 +134,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="bcp.cpp" />
     <ClCompile Include="principalProcess.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="bcp.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
     <ClInclude Include="collection.h" />
     <ClInclude Include="principalProcess.h">
       <FileType>CppForm</FileType>
@@ -144,6 +149,9 @@
     <ClInclude Include="programer.h" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="bcp.resx">
+      <DependentUpon>bcp.h</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="principalProcess.resx">
       <DependentUpon>principalProcess.h</DependentUpon>
     </EmbeddedResource>

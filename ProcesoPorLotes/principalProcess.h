@@ -4,6 +4,7 @@
 #include "programer.h"
 #include "process.h"
 #include "collection.h"
+#include "bcp.h"
 
 namespace ProcesoPorLotes {
 	Process generalProcess;
@@ -82,35 +83,12 @@ namespace ProcesoPorLotes {
 			}
 		}
 	private: System::Windows::Forms::TextBox^  txtNProcess;
-	protected:
-
-	protected:
-
-	protected:
-
-	protected:
-
-	protected:
 	private: System::Windows::Forms::Label^  label1;
-
-
-
-
-
-
 	private: System::Windows::Forms::Button^  btnAdd;
-
-
-
-
-
 	private: System::Windows::Forms::TextBox^  txtPending;
 	private: System::Windows::Forms::TextBox^  txtProcess;
-
 	private: System::Windows::Forms::TextBox^  txtFinished;
-
 	private: System::ComponentModel::IContainer^  components;
-
 	private:
 		/// <summary>
 		/// Variable del diseñador necesaria.
@@ -463,6 +441,7 @@ namespace ProcesoPorLotes {
 		process.setTimeBlocked(0);
 		process.setTimeEspera(0);
 		process.setIsError(false);
+		process.setTimeServicio(0);
 
 		queueNews->insertData(process);
 	}
@@ -630,6 +609,10 @@ namespace ProcesoPorLotes {
 
 		generalProcess.setTimeTrans((int)y);
 		generalProcess.setTimeServicio((int)y);
+		if(queueExecution->isEmpty() && generalProcess.getId() != -1){
+			queueExecution->dequeue();
+			queueExecution->insertData(generalProcess);
+		}
 		generalWatch++;
 		labelTotalTime->Text = y.ToString();
 		labelRestantTime->Text = (generalProcess.getTme() - y).ToString();
@@ -638,6 +621,7 @@ namespace ProcesoPorLotes {
 		while (!queueNews->isEmpty() && (queueReady->getItemCounter() + queueExecution->getItemCounter() + queueBlocked->getItemCounter()) < 3) {
 			process = queueNews->dequeue();
 			process.setTimeLlegada(generalWatch);
+			//process.setTimeRespuesta(generalWatch);
 			labelNews->Text = (--intPublic).ToString();
 
 			txtPending->Text += "ID: " + process.getId() + "\r\nTME = " + process.getTme().ToString() + "\r\n" +
@@ -679,6 +663,8 @@ namespace ProcesoPorLotes {
 				"\r\nTiempo de Espera: " + (time - generalProcess.getTimeServicio()).ToString() +
 				"\r\nTiempo de Servicio: " + generalProcess.getTimeServicio() +
 				"\r\n---------------------------------------------------------------\r\n";
+
+			queueFinished->insertData(generalProcess);
 
 			if (!queueNews->isEmpty()) {
 				process = queueNews->dequeue();
@@ -808,6 +794,9 @@ namespace ProcesoPorLotes {
 				txtPending->Text = txtPending->Text->Substring(toErase, max);
 
 				y = generalProcess.getTimeTrans();
+				if (generalProcess.getTimeRespuesta() == -1) {
+					generalProcess.setTimeRespuesta(generalWatch - generalProcess.getTimeLlegada());
+				}
 				queueExecution->insertData(generalProcess);
 				/*txtProcess->Text = "ID: " + generalProcess.getId().ToString() + "\r\nTiempo Trans: " + generalProcess.getTimeTrans().ToString() +
 					"\r\nTiempo Restante: " + (generalProcess.getTme() - generalProcess.getTimeTrans()).ToString() + "\r\n";*/
@@ -877,6 +866,18 @@ namespace ProcesoPorLotes {
 			//MessageBox::Show("P");
 		}
 	}
+	else if (ch == 'T') {
+		if (status == 3) {
+		}
+		else {
+			status = 3;
+			timer1->Stop();
+			showBCP();
+			txtStatus->Clear();
+			e->Handled = false;
+			//MessageBox::Show("P");
+		}
+	}
 	else if (ch == 'C') {
 		if (status == 3) {
 			status = 4;
@@ -916,27 +917,30 @@ namespace ProcesoPorLotes {
 		Collection<Process>* queueAux = new Collection<Process>;
 		Process process;
 		int time;
+		bcp ^bcpForm;
+		//bcpForm->Show();
+		System::String ^auxString;
 
+		auxString += "Procesos Finalizados: " + queueFinished->getItemCounter() + "\r\n";
+		auxString += "------------------------------------------------------------------\r\n";
 		while (!queueFinished->isEmpty()) {
 			queueAux->insertData(queueFinished->dequeue());
 		}
 		while (!queueAux->isEmpty()) {
 			queueFinished->insertData(process = queueAux->dequeue());
-			process = queueExecution->dequeue();
-			txtProcess->Text = "";
 
-			process.setTimeFinalizacion(generalWatch); // En caso de fallo moverle a esto por retorno
-			time = (generalProcess.getTimeFinalizacion() - generalProcess.getTimeLlegada() - generalProcess.getTimeServicio());
-			txtFinished->Text += "Número de programa: " + process.getId() +
-				"\r\nOperación: " + gcnew String(generalProcess.getOperation().c_str());
-			if (process.getisError()) {
-				txtFinished->Text += "\r\nResultado: ERROR";
+			time = (process.getTimeFinalizacion() - process.getTimeLlegada());
+			auxString += "Número de programa: " + process.getId() +
+				"\r\nOperación: " + gcnew String(process.getOperation().c_str()) +
+				"\r\nTME: " + process.getTme();
+			if (process.getIsError()) {
+				auxString += "\r\nResultado: ERROR";
 			}
 			else {
-				txtFinished->Text += "\r\nResultado: " + process.getResult();
+				auxString += "\r\nResultado: " + process.getResult();
 			}
-			time = (process.getTimeFinalizacion() - process.getTimeLlegada());
-			txtFinished->Text += "\r\n Tiempo de Llegada: " + process.getTimeLlegada() +
+			
+			auxString += "\r\n Tiempo de Llegada: " + process.getTimeLlegada() +
 				"\r\nTiempo de Finalizacion" + process.getTimeFinalizacion() +
 				"\r\nTiempo de Retorno: " + time +
 				"\r\nTiempo de Respuesta: " + process.getTimeRespuesta() +
@@ -945,28 +949,108 @@ namespace ProcesoPorLotes {
 				"\r\n------------------------------------------------------------------\r\n";
 		}
 
-		process = queueExecution->dequeue();
-		txtProcess->Text = "";
 
-		generalProcess.setTimeFinalizacion(generalWatch); // En caso de fallo moverle a esto por retorno
-		time = (generalProcess.getTimeFinalizacion() - generalProcess.getTimeLlegada() - generalProcess.getTimeServicio());
-		txtFinished->Text += "Número de programa: " + generalProcess.getId() +
-			"\r\nOperación: " + gcnew String(generalProcess.getOperation().c_str());
-		if (qGeneral == 2) {
-			generalProcess.setIsError(true);
-			txtFinished->Text += "\r\nResultado: ERROR";
+		auxString += "Procesos Nuevos: " + queueNews->getItemCounter() + "\r\n";
+		auxString += "------------------------------------------------------------------\r\n";
+		while (!queueNews->isEmpty()) {
+			queueAux->insertData(queueNews->dequeue());
 		}
-		else {
-			txtFinished->Text += "\r\nResultado: " + generalProcess.getResult();
+		while (!queueAux->isEmpty()) {
+			queueNews->insertData(process = queueAux->dequeue());
+
+			auxString += "Número de programa: " + process.getId() +
+				"\r\nOperación: " + gcnew String(process.getOperation().c_str()) +
+				"\r\nResultado: N/A" + 
+				"\r\nTME: " + process.getTme() +
+				"\r\n Tiempo de Llegada: N/A" +
+				"\r\nTiempo de Finalizacion N/A" +
+				"\r\nTiempo de Retorno: N/A" +
+				"\r\nTiempo de Respuesta: N/A" +
+				"\r\nTiempo de Espera: 0" +
+				"\r\nTiempo de Servicio: 0" +
+				"\r\n------------------------------------------------------------------\r\n";
 		}
-		time = (generalProcess.getTimeFinalizacion() - generalProcess.getTimeLlegada());
-		txtFinished->Text += "\r\n Tiempo de Llegada: " + generalProcess.getTimeLlegada() +
-			"\r\nTiempo de Finalizacion" + generalProcess.getTimeFinalizacion() +
-			"\r\nTiempo de Retorno: " + time +
-			"\r\nTiempo de Respuesta: " + generalProcess.getTimeRespuesta() +
-			"\r\nTiempo de Espera: " + (time - generalProcess.getTimeServicio()).ToString() +
-			"\r\nTiempo de Servicio: " + generalProcess.getTimeServicio() +
-			"\r\n------------------------------------------------------------------\r\n";
+		
+
+		auxString += "Procesos Listos: " + queueReady->getItemCounter() + "\r\n";
+		auxString += "------------------------------------------------------------------\r\n";
+		while (!queueReady->isEmpty()) {
+			queueAux->insertData(queueReady->dequeue());
+		}
+		while (!queueAux->isEmpty()) {
+			queueReady->insertData(process = queueAux->dequeue());
+
+			time = (generalWatch - process.getTimeLlegada());
+			auxString += "Número de programa: " + process.getId() +
+				"\r\nOperación: " + gcnew String(process.getOperation().c_str()) +
+				"\r\nResultado: N/A" +
+				"\r\nTME: " + process.getTme() +
+				"\r\n Tiempo de Llegada: " + process.getTimeLlegada() +
+				"\r\nTiempo de Finalizacion: N/A" +
+				"\r\nTiempo de Retorno: N/A";
+				if (process.getTimeRespuesta() == -1) {
+					auxString += "\r\nTiempo de Respuesta: N/A";
+				}
+				else {
+					auxString += "\r\nTiempo de Respuesta: " + process.getTimeRespuesta();
+				}
+				
+				auxString += 
+				"\r\nTiempo de Espera: " + (time - process.getTimeServicio()).ToString() +
+				"\r\nTiempo de Servicio: " + process.getTimeServicio() +
+				"\r\n------------------------------------------------------------------\r\n";
+		}
+
+
+		auxString += "Proceso en Ejecución: " + queueExecution->getItemCounter() + "\r\n";
+		auxString += "------------------------------------------------------------------\r\n";
+		while (!queueExecution->isEmpty()) {
+			queueAux->insertData(queueExecution->dequeue());
+		}
+		while (!queueAux->isEmpty()) {
+			queueExecution->insertData(process = queueAux->dequeue());
+
+			time = (generalWatch - process.getTimeLlegada());;
+			auxString += "Número de programa: " + process.getId() +
+				"\r\nOperación: " + gcnew String(process.getOperation().c_str()) +
+				"\r\nResultado: N/A" +
+				"\r\nTME: " + process.getTme() +
+				"\r\n Tiempo de Llegada: " + process.getTimeLlegada() +
+				"\r\nTiempo de Finalizacion: N/A" +
+				"\r\nTiempo de Retorno: N/A" +
+				"\r\nTiempo de Respuesta: " + process.getTimeRespuesta() +
+				"\r\nTiempo de Espera: " + (time - process.getTimeServicio()).ToString() +
+				"\r\nTiempo de Servicio: " + process.getTimeServicio() +
+				"\r\n------------------------------------------------------------------\r\n";
+		}
+
+
+		auxString += "Procesos Bloqueados: " + queueBlocked->getItemCounter() + "\r\n";
+		auxString += "------------------------------------------------------------------\r\n";
+		while (!queueBlocked->isEmpty()) {
+			queueAux->insertData(queueBlocked->dequeue());
+		}
+		while (!queueAux->isEmpty()) {
+			queueBlocked->insertData(process = queueAux->dequeue());
+
+			process.setTimeFinalizacion(generalWatch); // En caso de fallo moverle a esto por retorno
+			time = (process.getTimeFinalizacion() - process.getTimeLlegada() - process.getTimeServicio());
+			auxString += "Número de programa: " + process.getId() +
+				"\r\nOperación: " + gcnew String(process.getOperation().c_str()) +
+				"\r\nResultado: N/A";
+
+			time = (process.getTimeFinalizacion() - process.getTimeLlegada());
+			auxString += "\r\n Tiempo de Llegada: " + process.getTimeLlegada() +
+				"\r\nTiempo de Finalizacion: N/A" +
+				"\r\nTiempo de Retorno: N/A" +
+				"\r\nTiempo de Respuesta: " + process.getTimeRespuesta() +
+				"\r\nTiempo de Espera: " + (time - process.getTimeServicio()).ToString() +
+				"\r\nTiempo de Servicio: " + process.getTimeServicio() +
+				"\r\n------------------------------------------------------------------\r\n";
+		}
+
+		bcpForm = gcnew bcp(auxString);
+		//bcpForm->Show();
 	}
 
 	void marshalString(String ^ s, std::string& os) {

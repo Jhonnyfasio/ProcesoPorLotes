@@ -31,7 +31,7 @@ public:
 	int getTimeRespuesta();
 	int getTimeBlocked();
 	int getTimeEspera();
-	int getisError();
+	int getIsError();
 	//int getLote();
 	float getResult();
 
@@ -92,7 +92,7 @@ int Process::getTimeEspera(){
 	return timeEspera;
 }
 
-int Process::getisError() {
+int Process::getIsError() {
 	return isError;
 }
 /*int Process::getLote() {
