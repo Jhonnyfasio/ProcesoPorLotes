@@ -609,7 +609,7 @@ namespace ProcesoPorLotes {
 
 		generalProcess.setTimeTrans((int)y);
 		generalProcess.setTimeServicio((int)y);
-		if(queueExecution->isEmpty() && generalProcess.getId() != -1){
+		if(!queueExecution->isEmpty() && generalProcess.getId() != -1){
 			queueExecution->dequeue();
 			queueExecution->insertData(generalProcess);
 		}
@@ -966,8 +966,8 @@ namespace ProcesoPorLotes {
 				"\r\nTiempo de Finalizacion N/A" +
 				"\r\nTiempo de Retorno: N/A" +
 				"\r\nTiempo de Respuesta: N/A" +
-				"\r\nTiempo de Espera: 0" +
-				"\r\nTiempo de Servicio: 0" +
+				"\r\nTiempo de Espera: N/A" +
+				"\r\nTiempo de Servicio: N/A" +
 				"\r\n------------------------------------------------------------------\r\n";
 		}
 		
@@ -1037,7 +1037,8 @@ namespace ProcesoPorLotes {
 			time = (process.getTimeFinalizacion() - process.getTimeLlegada() - process.getTimeServicio());
 			auxString += "Número de programa: " + process.getId() +
 				"\r\nOperación: " + gcnew String(process.getOperation().c_str()) +
-				"\r\nResultado: N/A";
+				"\r\nResultado: N/A" +
+				"\r\nBloqueado: " + (generalWatch + 10 - process.getTimeBlocked()).ToString();
 
 			time = (process.getTimeFinalizacion() - process.getTimeLlegada());
 			auxString += "\r\n Tiempo de Llegada: " + process.getTimeLlegada() +
