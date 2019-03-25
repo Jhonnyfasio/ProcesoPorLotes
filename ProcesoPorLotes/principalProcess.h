@@ -63,6 +63,7 @@ namespace ProcesoPorLotes {
 	private: System::Windows::Forms::Label^  labelQuantum;
 	private: System::Windows::Forms::Label^  label11;
 	private: System::Windows::Forms::TextBox^  txtQuantum;
+	private: System::Windows::Forms::Label^  maxQuantum;
 	private: System::Windows::Forms::Label^  labelRestantTime;
 
 
@@ -136,6 +137,7 @@ namespace ProcesoPorLotes {
 			this->labelQuantum = (gcnew System::Windows::Forms::Label());
 			this->label11 = (gcnew System::Windows::Forms::Label());
 			this->txtQuantum = (gcnew System::Windows::Forms::TextBox());
+			this->maxQuantum = (gcnew System::Windows::Forms::Label());
 			this->SuspendLayout();
 			// 
 			// txtNProcess
@@ -364,11 +366,21 @@ namespace ProcesoPorLotes {
 			this->txtQuantum->Size = System::Drawing::Size(66, 20);
 			this->txtQuantum->TabIndex = 32;
 			// 
+			// maxQuantum
+			// 
+			this->maxQuantum->AutoSize = true;
+			this->maxQuantum->Location = System::Drawing::Point(280, 205);
+			this->maxQuantum->Name = L"maxQuantum";
+			this->maxQuantum->Size = System::Drawing::Size(13, 13);
+			this->maxQuantum->TabIndex = 33;
+			this->maxQuantum->Text = L"0";
+			// 
 			// principalProcess
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(678, 349);
+			this->Controls->Add(this->maxQuantum);
 			this->Controls->Add(this->txtQuantum);
 			this->Controls->Add(this->label11);
 			this->Controls->Add(this->labelQuantum);
@@ -658,6 +670,8 @@ namespace ProcesoPorLotes {
 		std::string aux;
 		txtBlocked->Text = "";
 
+		maxQuantum->Text = quantum.ToString();
+
 		if (generalProcess.getId() != -1 && y < generalProcess.getTme()) {
 			y++;
 			quantumCounter++;
@@ -699,7 +713,7 @@ namespace ProcesoPorLotes {
 			}
 
 			y = 0;
-			quantum = 0;
+			quantumCounter = 0;
 
 			process = queueExecution->dequeue();
 			txtProcess->Text = "";
@@ -762,18 +776,30 @@ namespace ProcesoPorLotes {
 			}
 		}
 
-		if (quantumCounter >= quantum) {
+		if (quantumCounter >= quantum && generalProcess.getId() != -1) {
 			queueReady->insertData(process = queueExecution->dequeue());
 			txtPending->Text += "ID: " + process.getId() + "\r\nTME = " + process.getTme().ToString() + "\r\n" +
 				"T Rest: " + (process.getTme() - process.getTimeTrans()).ToString() + "\r\n";
 
 			if (!queueReady->isEmpty()) {
-				queueExecution->insertData(generalProcess=queueReady->dequeue());
+
+				generalProcess = queueReady->dequeue();
+
+				if (generalProcess.getTimeRespuesta() == -1) {
+					//MessageBox::Show("ID:" + generalProcess.getId() + "\r\nRespuesta: " + (generalWatch - generalProcess.getTimeLlegada()));
+					generalProcess.setTimeRespuesta(generalWatch - generalProcess.getTimeLlegada());
+				}
+
+				queueExecution->insertData(generalProcess);
 
 				toErase = ("ID: " + generalProcess.getId() + "\r\nTME = " + generalProcess.getTme().ToString() + "\r\n" +
 					"T Rest: " + (generalProcess.getTme() - generalProcess.getTimeTrans()).ToString() + "\r\n")->Length;
 				max = txtPending->Text->Length - toErase;
 				txtPending->Text = txtPending->Text->Substring(toErase, max);
+
+				txtProcess->Text = "ID: " + generalProcess.getId().ToString() + "\r\nTiempo Trans: " + generalProcess.getTimeTrans().ToString() +
+					"\r\nTiempo Restante: " + (generalProcess.getTme() - generalProcess.getTimeTrans()).ToString() + "\r\nRespuesta: " +
+					generalProcess.getTimeRespuesta() + "\r\nLlegada: " + generalProcess.getTimeLlegada();
 			}
 			quantumCounter = 0;
 		}
@@ -859,6 +885,11 @@ namespace ProcesoPorLotes {
 				if (queueNews->isEmpty()) {
 					if (queueBlocked->isEmpty()) {
 						generalProcess.setId(-1);
+						
+						labelTotalTime->Text = "0";
+						labelRestantTime->Text = "0";
+						labelQuantum->Text = "0";
+						timer1->Stop();
 					}
 				}
 			}
