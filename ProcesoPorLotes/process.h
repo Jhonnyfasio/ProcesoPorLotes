@@ -8,6 +8,7 @@ class Process {
 private:
 	int id;
 	std::string operation;
+	int size;
 	int tme;
 	int timeTrans;
 	int timeLlegada;
@@ -23,6 +24,7 @@ private:
 public:
 	int getId();
 	std::string getOperation();
+	int getSize();
 	int getTme();
 	int getTimeTrans();
 	int getTimeLlegada();
@@ -37,6 +39,7 @@ public:
 
 	void setId(const int& idX);
 	void setOperation(std::string& operationX);
+	void setSize(const int& sizeX);
 	void setTme(const int& tmeX);
 	void setTimeTrans(const int  timeX);
 	void setTimeLlegada(const int timeX);
@@ -58,6 +61,10 @@ int Process::getId() {
 
 std::string Process::getOperation() {
 	return operation;
+}
+
+int Process::getSize() {
+	return size;
 }
 
 int Process::getTme() {
@@ -109,6 +116,10 @@ void Process::setId(const int& idX) {
 
 void Process::setOperation(std::string& operationX) {
 	operation = operationX;
+}
+
+void Process::setSize(const int& sizeX) {
+	size = sizeX;
 }
 
 void Process::setTme(const int& tmeX) {

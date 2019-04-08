@@ -6,6 +6,9 @@
 #include "collection.h"
 #include "bcp.h"
 
+#define TOTAL_MEMORY 140
+#define FRAME 4
+
 namespace ProcesoPorLotes {
 	Process generalProcess;
 	using namespace System;
@@ -62,8 +65,10 @@ namespace ProcesoPorLotes {
 	private: System::Windows::Forms::Label^  label14;
 	private: System::Windows::Forms::Label^  labelQuantum;
 	private: System::Windows::Forms::Label^  label11;
-	private: System::Windows::Forms::TextBox^  txtQuantum;
+
 	private: System::Windows::Forms::Label^  maxQuantum;
+	private: System::Windows::Forms::Panel^  panelDrawing;
+
 	private: System::Windows::Forms::Label^  labelRestantTime;
 
 
@@ -136,8 +141,8 @@ namespace ProcesoPorLotes {
 			this->label14 = (gcnew System::Windows::Forms::Label());
 			this->labelQuantum = (gcnew System::Windows::Forms::Label());
 			this->label11 = (gcnew System::Windows::Forms::Label());
-			this->txtQuantum = (gcnew System::Windows::Forms::TextBox());
 			this->maxQuantum = (gcnew System::Windows::Forms::Label());
+			this->panelDrawing = (gcnew System::Windows::Forms::Panel());
 			this->SuspendLayout();
 			// 
 			// txtNProcess
@@ -359,29 +364,30 @@ namespace ProcesoPorLotes {
 			this->label11->TabIndex = 31;
 			this->label11->Text = L"Quantum";
 			// 
-			// txtQuantum
-			// 
-			this->txtQuantum->Location = System::Drawing::Point(128, 58);
-			this->txtQuantum->Name = L"txtQuantum";
-			this->txtQuantum->Size = System::Drawing::Size(66, 20);
-			this->txtQuantum->TabIndex = 32;
-			// 
 			// maxQuantum
 			// 
 			this->maxQuantum->AutoSize = true;
-			this->maxQuantum->Location = System::Drawing::Point(280, 205);
+			this->maxQuantum->Location = System::Drawing::Point(125, 61);
 			this->maxQuantum->Name = L"maxQuantum";
 			this->maxQuantum->Size = System::Drawing::Size(13, 13);
 			this->maxQuantum->TabIndex = 33;
 			this->maxQuantum->Text = L"0";
 			// 
+			// panelDrawing
+			// 
+			this->panelDrawing->Location = System::Drawing::Point(23, 359);
+			this->panelDrawing->Name = L"panelDrawing";
+			this->panelDrawing->Size = System::Drawing::Size(631, 91);
+			this->panelDrawing->TabIndex = 34;
+			this->panelDrawing->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &principalProcess::panel1_Paint);
+			// 
 			// principalProcess
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(678, 349);
+			this->ClientSize = System::Drawing::Size(678, 462);
+			this->Controls->Add(this->panelDrawing);
 			this->Controls->Add(this->maxQuantum);
-			this->Controls->Add(this->txtQuantum);
 			this->Controls->Add(this->label11);
 			this->Controls->Add(this->labelQuantum);
 			this->Controls->Add(this->label14);
@@ -425,18 +431,13 @@ namespace ProcesoPorLotes {
 		std::string aux, aux2, aux3;
 		int auxInt, auxInt2, auxInt3, caracter;
 
-		if (txtNProcess->Text->IsNullOrWhiteSpace(txtNProcess->Text) || txtQuantum->Text->IsNullOrWhiteSpace(txtQuantum->Text))
+		if (txtNProcess->Text->IsNullOrWhiteSpace(txtNProcess->Text))
 		{
 			MessageBox::Show("Error, no puede haber campos vacíos");
 			return;
 		}
 
-		marshalString(txtQuantum->Text, aux);
-		if ((auxInt = atoi(aux.c_str())) < 1) {
-			MessageBox::Show("Error, no se puede pedir menos de un proceso");
-			return;
-		}
-		quantum = auxInt;
+		quantum = rand() % 5 + 3;
 
 		marshalString(txtNProcess->Text, aux);
 		if ((auxInt = atoi(aux.c_str())) < 1) {
@@ -501,6 +502,8 @@ namespace ProcesoPorLotes {
 		automatonOperational(aux);
 		auxInt2 = generalResult;
 		process.setResult(auxInt2);
+
+		process.setSize(rand() % 30 + 5);
 
 		process.setTme(rand() % 12 + 7);
 		process.setTimeTrans(0);
@@ -1167,6 +1170,19 @@ namespace ProcesoPorLotes {
 		const char* chars = (const char*)(Marshal::StringToHGlobalAnsi(s)).ToPointer();
 		os = chars;
 		Marshal::FreeHGlobal(IntPtr((void*)chars));
+	}
+
+	private: System::Void panel1_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e) {
+		SolidBrush ^sb = gcnew SolidBrush(Color::White);
+		Pen ^p = gcnew Pen(Color::Black);
+		Graphics ^g = panelDrawing->CreateGraphics();
+		//
+
+		for (int i(0), j(0); i < 35; i++) {
+			g->DrawRectangle(p, 0, j, 90, 15);
+			g->FillRectangle(sb, 1, j + 1, 89, 14);
+			j = j + 15;
+		}
 	}
 };
 }
