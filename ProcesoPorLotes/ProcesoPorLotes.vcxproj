@@ -142,6 +142,7 @@
       <FileType>CppForm</FileType>
     </ClInclude>
     <ClInclude Include="collection.h" />
+    <ClInclude Include="memory.h" />
     <ClInclude Include="principalProcess.h">
       <FileType>CppForm</FileType>
     </ClInclude>

@@ -5,9 +5,10 @@
 #include "process.h"
 #include "collection.h"
 #include "bcp.h"
+#include "memory.h"
 
-#define TOTAL_MEMORY 140
-#define FRAME 4
+#define TOTAL_MEMORY 180
+#define FRAME 5
 
 namespace ProcesoPorLotes {
 	Process generalProcess;
@@ -42,6 +43,14 @@ namespace ProcesoPorLotes {
 		Collection<Process>* queueExecution = new Collection<Process>;
 		Collection<Process>* queueBlocked = new Collection<Process>;
 		Collection<Process>* queueFinished = new Collection<Process>;
+		Collection<Memory>* listInMemory = new Collection<Memory>;
+		Collection<Memory>* listOutMemory = new Collection<Memory>;
+		Graphics ^g;
+		SolidBrush ^sbYellow = gcnew SolidBrush(Color::Yellow);
+		SolidBrush ^sbGreen = gcnew SolidBrush(Color::Green);
+		SolidBrush ^sbOrange = gcnew SolidBrush(Color::Orange);
+		SolidBrush ^sbWhite = gcnew SolidBrush(Color::White);
+		SolidBrush ^sbBlack = gcnew SolidBrush(Color::Black);
 
 	private: System::Windows::Forms::Label^  label5;
 	private: System::Windows::Forms::Label^  labelNews;
@@ -76,11 +85,20 @@ namespace ProcesoPorLotes {
 			 principalProcess(void)
 			 {
 				 InitializeComponent();
+				 g = panelDrawing->CreateGraphics();
+				 Memory memory;
 				 //
 				 //TODO: agregar código de constructor aquí
 				 //
 				 queueNews = new Collection<Process>;
 				 secondListData = new Collection<Process>;
+
+				 memory.setSize(0);
+				 memory.setMax(FRAME);
+				 for(int i(0); i < 36; i++){
+					 memory.setId(i + 1);
+					 listOutMemory->insertData(memory);
+				 }
 			 }
 
 	protected:
@@ -375,9 +393,9 @@ namespace ProcesoPorLotes {
 			// 
 			// panelDrawing
 			// 
-			this->panelDrawing->Location = System::Drawing::Point(23, 359);
+			this->panelDrawing->Location = System::Drawing::Point(13, 359);
 			this->panelDrawing->Name = L"panelDrawing";
-			this->panelDrawing->Size = System::Drawing::Size(631, 91);
+			this->panelDrawing->Size = System::Drawing::Size(649, 91);
 			this->panelDrawing->TabIndex = 34;
 			this->panelDrawing->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &principalProcess::panel1_Paint);
 			// 
@@ -503,7 +521,7 @@ namespace ProcesoPorLotes {
 		auxInt2 = generalResult;
 		process.setResult(auxInt2);
 
-		process.setSize(rand() % 30 + 5);
+		process.setSize(rand() % 30 + 6);
 
 		process.setTme(rand() % 12 + 7);
 		process.setTimeTrans(0);
@@ -628,19 +646,50 @@ namespace ProcesoPorLotes {
 
 	void executeProcess() {
 		Process process;
+		Memory memory;
+		
 		int tmeTotal = 0;
-		int toErase, max;
-		int maxProcess = 0;
+		int toErase, max, aux, sizeAux, j(0);
+		bool isFull = false;
 
-		while (!queueNews->isEmpty() && maxProcess < 3) {
-			maxProcess++;
+		while (!queueNews->isEmpty() && !isFull) {
 			--intPublic;
 			process = queueNews->dequeue();
-			txtPending->Text += "ID: " + process.getId() + "\r\nTME = " + process.getTme().ToString() + "\r\n" +
-				"T Rest: " + (process.getTme() - process.getTimeTrans()).ToString() + "\r\n";
 
-			process.setTimeLlegada(y);
-			queueReady->insertData(process);
+			aux = process.getSize() / FRAME;
+			if (process.getSize() % FRAME != 0) {
+				aux++;
+			}
+			sizeAux = process.getSize();
+
+			if (listOutMemory->getItemCounter() >= aux) {
+				for (int i(0); i < aux; i++) {
+					memory = listOutMemory->dequeue();
+					memory.setId(process.getId());
+					if (sizeAux >= FRAME) {
+						memory.setSize(FRAME);
+						sizeAux = sizeAux - 5;
+					}
+					else {
+						memory.setSize(sizeAux);
+					}
+					
+					listInMemory->insertData(memory);
+					g->FillRectangle(sbYellow, j + 1, 1, 17, (17.6)*memory.getSize());
+					g->DrawString(process.getId().ToString(), this->Font, sbBlack, PointF(j+2,40));
+					j = j + 18;
+				}
+				txtPending->Text += "ID: " + process.getId() + "\r\nTME = " + process.getTme().ToString() + "\r\n" +
+					"T Rest: " + (process.getTme() - process.getTimeTrans()).ToString() + "\r\n";
+
+				process.setTimeLlegada(y);
+				queueReady->insertData(process);
+			}
+			else {
+				isFull = true;
+			}
+
+			
 		}
 		if (queueExecution->isEmpty()) {
 			process = queueReady->dequeue();
@@ -1173,15 +1222,13 @@ namespace ProcesoPorLotes {
 	}
 
 	private: System::Void panel1_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e) {
-		SolidBrush ^sb = gcnew SolidBrush(Color::White);
 		Pen ^p = gcnew Pen(Color::Black);
-		Graphics ^g = panelDrawing->CreateGraphics();
 		//
 
-		for (int i(0), j(0); i < 35; i++) {
-			g->DrawRectangle(p, 0, j, 90, 15);
-			g->FillRectangle(sb, 1, j + 1, 89, 14);
-			j = j + 15;
+		for (int i(0), j(0); i < 36; i++) {
+			g->DrawRectangle(p, j, 0, 18, 90);
+			g->FillRectangle(sbWhite, j+1, 1, 17, 89);
+			j = j + 18;
 		}
 	}
 };

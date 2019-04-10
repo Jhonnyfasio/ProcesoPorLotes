@@ -38,9 +38,15 @@
     <ClInclude Include="bcp.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="memory.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="principalProcess.resx">
+      <Filter>Archivos de recursos</Filter>
+    </EmbeddedResource>
+    <EmbeddedResource Include="bcp.resx">
       <Filter>Archivos de recursos</Filter>
     </EmbeddedResource>
   </ItemGroup>
