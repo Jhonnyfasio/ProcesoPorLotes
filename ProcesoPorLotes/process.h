@@ -9,6 +9,7 @@ private:
 	int id;
 	std::string operation;
 	int size;
+	int location;
 	int tme;
 	int timeTrans;
 	int timeLlegada;
@@ -25,6 +26,7 @@ public:
 	int getId();
 	std::string getOperation();
 	int getSize();
+	int getLocation();
 	int getTme();
 	int getTimeTrans();
 	int getTimeLlegada();
@@ -40,6 +42,7 @@ public:
 	void setId(const int& idX);
 	void setOperation(std::string& operationX);
 	void setSize(const int& sizeX);
+	void setLocation(const int& sizeX);
 	void setTme(const int& tmeX);
 	void setTimeTrans(const int  timeX);
 	void setTimeLlegada(const int timeX);
@@ -65,6 +68,10 @@ std::string Process::getOperation() {
 
 int Process::getSize() {
 	return size;
+}
+
+int Process::getLocation() {
+	return location;
 }
 
 int Process::getTme() {
@@ -120,6 +127,10 @@ void Process::setOperation(std::string& operationX) {
 
 void Process::setSize(const int& sizeX) {
 	size = sizeX;
+}
+
+void Process::setLocation(const int& locationX) {
+	location = locationX;
 }
 
 void Process::setTme(const int& tmeX) {

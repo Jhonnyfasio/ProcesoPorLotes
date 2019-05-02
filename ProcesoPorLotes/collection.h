@@ -457,6 +457,34 @@ template<class T> class Collection {
 			return false;
 		}
 
+		bool findIdProcessProcess(int toFind) {
+			if (isEmpty()) {
+				return false;
+			}
+			Node* aux(header->getNext());
+			while (aux != header) {
+				if (aux->getData().getIdProcess() == toFind) {
+					return true;
+				}
+				aux = aux->getNext();
+			}
+			return false;
+		}
+
+		Node* findIdProcessProcessNode(int toFind) {
+			if (isEmpty()) {
+				return false;
+			}
+			Node* aux(header->getNext());
+			while (aux != header) {
+				if (aux->getData().getIdProcess() == toFind) {
+					return aux;
+				}
+				aux = aux->getNext();
+			}
+			return nullptr;
+		}
+
         T& getData(Node* aux) {
             if(aux != nullptr){
                 return aux->getData();
