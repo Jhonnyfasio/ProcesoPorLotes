@@ -1,6 +1,7 @@
 #pragma once
 
 #include <time.h>
+#include <fstream>
 #include "programer.h"
 #include "process.h"
 #include "collection.h"
@@ -9,6 +10,7 @@
 
 #define TOTAL_MEMORY 180
 #define FRAME 5
+#define FILENAME ""
 
 namespace ProcesoPorLotes {
 	Process generalProcess;
@@ -75,7 +77,7 @@ namespace ProcesoPorLotes {
 	private: System::Windows::Forms::Label^  label10;
 	private: System::Windows::Forms::Label^  label14;
 	private: System::Windows::Forms::Label^  labelQuantum;
-	private: System::Windows::Forms::Label^  label11;
+
 
 	private: System::Windows::Forms::Label^  maxQuantum;
 	private: System::Windows::Forms::Panel^  panelDrawing;
@@ -84,6 +86,9 @@ namespace ProcesoPorLotes {
 	private: System::Windows::Forms::TextBox^  txtNew;
 
 	private: System::Windows::Forms::Label^  label13;
+	private: System::Windows::Forms::TextBox^  txtQuantum;
+	private: System::Windows::Forms::Label^  label15;
+	private: System::Windows::Forms::Label^  label11;
 
 	private: System::Windows::Forms::Label^  labelRestantTime;
 
@@ -102,7 +107,7 @@ namespace ProcesoPorLotes {
 
 				 memory.setSize(0);
 				 memory.setMax(FRAME);
-				 for(int i(0); i < 35; i++){
+				 for(int i(0); i < 36; i++){
 					 memory.setId(i);
 					 listOutMemory->insertData(memory);
 				 }
@@ -165,13 +170,15 @@ namespace ProcesoPorLotes {
 			this->label10 = (gcnew System::Windows::Forms::Label());
 			this->label14 = (gcnew System::Windows::Forms::Label());
 			this->labelQuantum = (gcnew System::Windows::Forms::Label());
-			this->label11 = (gcnew System::Windows::Forms::Label());
 			this->maxQuantum = (gcnew System::Windows::Forms::Label());
 			this->panelDrawing = (gcnew System::Windows::Forms::Panel());
 			this->label12 = (gcnew System::Windows::Forms::Label());
 			this->labelOutMemory = (gcnew System::Windows::Forms::Label());
 			this->txtNew = (gcnew System::Windows::Forms::TextBox());
 			this->label13 = (gcnew System::Windows::Forms::Label());
+			this->txtQuantum = (gcnew System::Windows::Forms::TextBox());
+			this->label15 = (gcnew System::Windows::Forms::Label());
+			this->label11 = (gcnew System::Windows::Forms::Label());
 			this->SuspendLayout();
 			// 
 			// txtNProcess
@@ -192,7 +199,7 @@ namespace ProcesoPorLotes {
 			// 
 			// btnAdd
 			// 
-			this->btnAdd->Location = System::Drawing::Point(149, 31);
+			this->btnAdd->Location = System::Drawing::Point(149, 55);
 			this->btnAdd->Name = L"btnAdd";
 			this->btnAdd->Size = System::Drawing::Size(75, 23);
 			this->btnAdd->TabIndex = 8;
@@ -202,7 +209,7 @@ namespace ProcesoPorLotes {
 			// 
 			// txtPending
 			// 
-			this->txtPending->Location = System::Drawing::Point(11, 159);
+			this->txtPending->Location = System::Drawing::Point(11, 177);
 			this->txtPending->Multiline = true;
 			this->txtPending->Name = L"txtPending";
 			this->txtPending->ReadOnly = true;
@@ -221,7 +228,7 @@ namespace ProcesoPorLotes {
 			// 
 			// txtFinished
 			// 
-			this->txtFinished->Location = System::Drawing::Point(449, 28);
+			this->txtFinished->Location = System::Drawing::Point(449, 46);
 			this->txtFinished->Multiline = true;
 			this->txtFinished->Name = L"txtFinished";
 			this->txtFinished->ReadOnly = true;
@@ -232,7 +239,7 @@ namespace ProcesoPorLotes {
 			// label5
 			// 
 			this->label5->AutoSize = true;
-			this->label5->Location = System::Drawing::Point(13, 65);
+			this->label5->Location = System::Drawing::Point(13, 90);
 			this->label5->Name = L"label5";
 			this->label5->Size = System::Drawing::Size(47, 13);
 			this->label5->TabIndex = 14;
@@ -241,7 +248,7 @@ namespace ProcesoPorLotes {
 			// labelNews
 			// 
 			this->labelNews->AutoSize = true;
-			this->labelNews->Location = System::Drawing::Point(66, 65);
+			this->labelNews->Location = System::Drawing::Point(66, 90);
 			this->labelNews->Name = L"labelNews";
 			this->labelNews->Size = System::Drawing::Size(13, 13);
 			this->labelNews->TabIndex = 15;
@@ -254,7 +261,7 @@ namespace ProcesoPorLotes {
 			// label7
 			// 
 			this->label7->AutoSize = true;
-			this->label7->Location = System::Drawing::Point(322, 140);
+			this->label7->Location = System::Drawing::Point(322, 158);
 			this->label7->Name = L"label7";
 			this->label7->Size = System::Drawing::Size(72, 13);
 			this->label7->TabIndex = 16;
@@ -263,7 +270,7 @@ namespace ProcesoPorLotes {
 			// label6
 			// 
 			this->label6->AutoSize = true;
-			this->label6->Location = System::Drawing::Point(303, 160);
+			this->label6->Location = System::Drawing::Point(303, 178);
 			this->label6->Name = L"label6";
 			this->label6->Size = System::Drawing::Size(91, 13);
 			this->label6->TabIndex = 17;
@@ -272,7 +279,7 @@ namespace ProcesoPorLotes {
 			// labelTotalTime
 			// 
 			this->labelTotalTime->AutoSize = true;
-			this->labelTotalTime->Location = System::Drawing::Point(414, 140);
+			this->labelTotalTime->Location = System::Drawing::Point(414, 158);
 			this->labelTotalTime->Name = L"labelTotalTime";
 			this->labelTotalTime->Size = System::Drawing::Size(13, 13);
 			this->labelTotalTime->TabIndex = 18;
@@ -281,7 +288,7 @@ namespace ProcesoPorLotes {
 			// labelRestantTime
 			// 
 			this->labelRestantTime->AutoSize = true;
-			this->labelRestantTime->Location = System::Drawing::Point(414, 160);
+			this->labelRestantTime->Location = System::Drawing::Point(414, 178);
 			this->labelRestantTime->Name = L"labelRestantTime";
 			this->labelRestantTime->Size = System::Drawing::Size(13, 13);
 			this->labelRestantTime->TabIndex = 19;
@@ -289,7 +296,7 @@ namespace ProcesoPorLotes {
 			// 
 			// txtStatus
 			// 
-			this->txtStatus->Location = System::Drawing::Point(80, 31);
+			this->txtStatus->Location = System::Drawing::Point(80, 57);
 			this->txtStatus->Name = L"txtStatus";
 			this->txtStatus->Size = System::Drawing::Size(66, 20);
 			this->txtStatus->TabIndex = 20;
@@ -298,7 +305,7 @@ namespace ProcesoPorLotes {
 			// label2
 			// 
 			this->label2->AutoSize = true;
-			this->label2->Location = System::Drawing::Point(8, 31);
+			this->label2->Location = System::Drawing::Point(5, 57);
 			this->label2->Name = L"label2";
 			this->label2->Size = System::Drawing::Size(40, 13);
 			this->label2->TabIndex = 21;
@@ -316,7 +323,7 @@ namespace ProcesoPorLotes {
 			// label4
 			// 
 			this->label4->AutoSize = true;
-			this->label4->Location = System::Drawing::Point(239, 140);
+			this->label4->Location = System::Drawing::Point(239, 158);
 			this->label4->Name = L"label4";
 			this->label4->Size = System::Drawing::Size(34, 13);
 			this->label4->TabIndex = 23;
@@ -325,7 +332,7 @@ namespace ProcesoPorLotes {
 			// labelWatch
 			// 
 			this->labelWatch->AutoSize = true;
-			this->labelWatch->Location = System::Drawing::Point(279, 140);
+			this->labelWatch->Location = System::Drawing::Point(279, 158);
 			this->labelWatch->Name = L"labelWatch";
 			this->labelWatch->Size = System::Drawing::Size(13, 13);
 			this->labelWatch->TabIndex = 24;
@@ -333,7 +340,7 @@ namespace ProcesoPorLotes {
 			// 
 			// txtBlocked
 			// 
-			this->txtBlocked->Location = System::Drawing::Point(230, 208);
+			this->txtBlocked->Location = System::Drawing::Point(230, 226);
 			this->txtBlocked->Multiline = true;
 			this->txtBlocked->Name = L"txtBlocked";
 			this->txtBlocked->ReadOnly = true;
@@ -343,7 +350,7 @@ namespace ProcesoPorLotes {
 			// label8
 			// 
 			this->label8->AutoSize = true;
-			this->label8->Location = System::Drawing::Point(230, 192);
+			this->label8->Location = System::Drawing::Point(230, 210);
 			this->label8->Name = L"label8";
 			this->label8->Size = System::Drawing::Size(66, 13);
 			this->label8->TabIndex = 26;
@@ -361,7 +368,7 @@ namespace ProcesoPorLotes {
 			// label10
 			// 
 			this->label10->AutoSize = true;
-			this->label10->Location = System::Drawing::Point(12, 143);
+			this->label10->Location = System::Drawing::Point(12, 161);
 			this->label10->Name = L"label10";
 			this->label10->Size = System::Drawing::Size(34, 13);
 			this->label10->TabIndex = 28;
@@ -370,7 +377,7 @@ namespace ProcesoPorLotes {
 			// label14
 			// 
 			this->label14->AutoSize = true;
-			this->label14->Location = System::Drawing::Point(341, 180);
+			this->label14->Location = System::Drawing::Point(341, 198);
 			this->label14->Name = L"label14";
 			this->label14->Size = System::Drawing::Size(53, 13);
 			this->label14->TabIndex = 29;
@@ -379,20 +386,11 @@ namespace ProcesoPorLotes {
 			// labelQuantum
 			// 
 			this->labelQuantum->AutoSize = true;
-			this->labelQuantum->Location = System::Drawing::Point(414, 180);
+			this->labelQuantum->Location = System::Drawing::Point(414, 198);
 			this->labelQuantum->Name = L"labelQuantum";
 			this->labelQuantum->Size = System::Drawing::Size(13, 13);
 			this->labelQuantum->TabIndex = 30;
 			this->labelQuantum->Text = L"0";
-			// 
-			// label11
-			// 
-			this->label11->AutoSize = true;
-			this->label11->Location = System::Drawing::Point(152, 9);
-			this->label11->Name = L"label11";
-			this->label11->Size = System::Drawing::Size(50, 13);
-			this->label11->TabIndex = 31;
-			this->label11->Text = L"Quantum";
 			// 
 			// maxQuantum
 			// 
@@ -405,28 +403,28 @@ namespace ProcesoPorLotes {
 			// 
 			// panelDrawing
 			// 
-			this->panelDrawing->Location = System::Drawing::Point(8, 340);
+			this->panelDrawing->Location = System::Drawing::Point(13, 358);
 			this->panelDrawing->Name = L"panelDrawing";
-			this->panelDrawing->Size = System::Drawing::Size(666, 91);
+			this->panelDrawing->Size = System::Drawing::Size(649, 91);
 			this->panelDrawing->TabIndex = 34;
 			this->panelDrawing->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &principalProcess::panel1_Paint);
 			// 
 			// label12
 			// 
 			this->label12->AutoSize = true;
-			this->label12->Font = (gcnew System::Drawing::Font(L"Copperplate Gothic Bold", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+			this->label12->Font = (gcnew System::Drawing::Font(L"Amiri Quran", 7, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
-			this->label12->Location = System::Drawing::Point(5, 322);
+			this->label12->Location = System::Drawing::Point(15, 344);
 			this->label12->Name = L"label12";
-			this->label12->Size = System::Drawing::Size(669, 13);
+			this->label12->Size = System::Drawing::Size(648, 13);
 			this->label12->TabIndex = 35;
-			this->label12->Text = L"01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 "
-				L"28 29 30 31 32 33 34 35";
+			this->label12->Text = L"01  02  03  04  05  06  07  08  09  10  11  12  13  14  15  16  17  18  19  20  2"
+				L"1  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36";
 			// 
 			// labelOutMemory
 			// 
 			this->labelOutMemory->AutoSize = true;
-			this->labelOutMemory->Location = System::Drawing::Point(239, 162);
+			this->labelOutMemory->Location = System::Drawing::Point(239, 180);
 			this->labelOutMemory->Name = L"labelOutMemory";
 			this->labelOutMemory->Size = System::Drawing::Size(13, 13);
 			this->labelOutMemory->TabIndex = 36;
@@ -434,7 +432,7 @@ namespace ProcesoPorLotes {
 			// 
 			// txtNew
 			// 
-			this->txtNew->Location = System::Drawing::Point(14, 81);
+			this->txtNew->Location = System::Drawing::Point(14, 106);
 			this->txtNew->Multiline = true;
 			this->txtNew->Name = L"txtNew";
 			this->txtNew->Size = System::Drawing::Size(210, 52);
@@ -443,17 +441,44 @@ namespace ProcesoPorLotes {
 			// label13
 			// 
 			this->label13->AutoSize = true;
-			this->label13->Location = System::Drawing::Point(134, 65);
+			this->label13->Location = System::Drawing::Point(134, 90);
 			this->label13->Name = L"label13";
 			this->label13->Size = System::Drawing::Size(90, 13);
 			this->label13->TabIndex = 38;
 			this->label13->Text = L"Primer Candidato:";
 			// 
+			// txtQuantum
+			// 
+			this->txtQuantum->Location = System::Drawing::Point(80, 33);
+			this->txtQuantum->Name = L"txtQuantum";
+			this->txtQuantum->Size = System::Drawing::Size(66, 20);
+			this->txtQuantum->TabIndex = 39;
+			// 
+			// label15
+			// 
+			this->label15->AutoSize = true;
+			this->label15->Location = System::Drawing::Point(4, 31);
+			this->label15->Name = L"label15";
+			this->label15->Size = System::Drawing::Size(50, 13);
+			this->label15->TabIndex = 40;
+			this->label15->Text = L"Quantum";
+			// 
+			// label11
+			// 
+			this->label11->AutoSize = true;
+			this->label11->Location = System::Drawing::Point(152, 9);
+			this->label11->Name = L"label11";
+			this->label11->Size = System::Drawing::Size(50, 13);
+			this->label11->TabIndex = 31;
+			this->label11->Text = L"Quantum";
+			// 
 			// principalProcess
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(678, 439);
+			this->ClientSize = System::Drawing::Size(678, 455);
+			this->Controls->Add(this->label15);
+			this->Controls->Add(this->txtQuantum);
 			this->Controls->Add(this->label13);
 			this->Controls->Add(this->txtNew);
 			this->Controls->Add(this->labelOutMemory);
@@ -503,20 +528,26 @@ namespace ProcesoPorLotes {
 		std::string aux, aux2, aux3;
 		int auxInt, auxInt2, auxInt3, caracter;
 
-		if (txtNProcess->Text->IsNullOrWhiteSpace(txtNProcess->Text))
+		if (txtNProcess->Text->IsNullOrWhiteSpace(txtNProcess->Text) || txtQuantum->Text->IsNullOrWhiteSpace(txtQuantum->Text))
 		{
 			MessageBox::Show("Error, no puede haber campos vacíos");
 			return;
 		}
-		srand(NULL);
-		quantum = rand() % 5 + 3;
+
+		marshalString(txtQuantum->Text, aux);
+		if ((auxInt = atoi(aux.c_str())) < 3) {
+			MessageBox::Show("Error, no se puede pedir menos de 3 de Quantum");
+			return;
+		}
+
+		quantum = auxInt;
 
 		marshalString(txtNProcess->Text, aux);
 		if ((auxInt = atoi(aux.c_str())) < 1) {
 			MessageBox::Show("Error, no se puede pedir menos de un proceso");
 			return;
 		}
-		srand(time(NULL));
+
 		for (int i = 0; i < auxInt; i++) {
 			chargeProcess(i+1);
 		}
@@ -599,15 +630,15 @@ namespace ProcesoPorLotes {
 		bool isFull = false;
 
 		process.setId(0);
-		for (int i(0); i < 3; i++) {
+		for (int i(0); i < 2; i++) {
 			memory = listOutMemory->dequeue();
 			memory.setSize(FRAME);
 			memory.setId(-1);
 			listInMemory->insertData(memory);
 
-			g->FillRectangle(sbGray, j + 1, 1, 18, (17.6)*memory.getSize());
+			g->FillRectangle(sbGray, j + 1, 1, 17, (17.6)*memory.getSize() + 1);
 			g->DrawString(process.getId().ToString(), this->Font, sbWhite, PointF(j + 2, 40));
-			j = j + 19;
+			j = j + 18;
 		}
 
 		while (!queueNews->isEmpty() && !isFull) {
@@ -636,9 +667,9 @@ namespace ProcesoPorLotes {
 					memory.setIdProcess(process.getId());
 
 					listInMemory->insertData(memory);
-					g->FillRectangle(sbBlue, j + 1, 1, 18, (17.6)*memory.getSize());
+					g->FillRectangle(sbBlue, j + 1, 1, 17, (17.6)*memory.getSize() + 1);
 					g->DrawString(process.getId().ToString(), this->Font, sbBlack, PointF(j + 2, 40));
-					j = j + 19;
+					j = j + 18;
 				}
 				txtPending->Text += "ID: " + process.getId() + "\r\nTME = " + process.getTme().ToString() + "\r\n" +
 					"T Rest: " + (process.getTme() - process.getTimeTrans()).ToString() + "\r\n";
@@ -678,7 +709,7 @@ namespace ProcesoPorLotes {
 		actualizeMemory(generalProcess, sbGreen);
 
 		labelNews->Text = intPublic.ToString();
-		timer1->Interval = 1000;
+		timer1->Interval = 500;
 		timer1->Start();
 	}
 
@@ -1085,7 +1116,7 @@ namespace ProcesoPorLotes {
 		return;
 	}
 
-	if (ch == 'E') {
+	if (ch == 'I') {
 		if (status == 3) {
 
 		}
@@ -1100,7 +1131,7 @@ namespace ProcesoPorLotes {
 			//MessageBox::Show("I");
 		}
 	}
-	else if (ch == 'W') {
+	else if (ch == 'E') {
 		if (status == 3) {
 		}
 		else {
@@ -1112,7 +1143,7 @@ namespace ProcesoPorLotes {
 			e->Handled = false;
 		}
 	}
-	else if (ch == 'P' || ch == 'T') {
+	else if (ch == 'P' || ch == 'M') {
 		if(status == 3){
 		}
 		else {
@@ -1123,7 +1154,7 @@ namespace ProcesoPorLotes {
 			//MessageBox::Show("P");
 		}
 	}
-	else if (ch == 'B') {
+	else if (ch == 'T') {
 		if (status == 3) {
 		}
 		else {
@@ -1317,9 +1348,9 @@ namespace ProcesoPorLotes {
 		size = maxSize / FRAME;
 
 		for (int i(0); i < maxSize; i++) {
-			g->FillRectangle(sb, j + 1, 1, 18, (17.6)*size);
+			g->FillRectangle(sb, j + 1, 1, 17, (17.6)*size + 1);
 			g->DrawString(process.getId().ToString(), this->Font, sbBlack, PointF(j + 2, 40));
-			j = j + 19;
+			j = j + 18;
 		}
 		
 	}
@@ -1334,8 +1365,8 @@ namespace ProcesoPorLotes {
 			}
 			while (!listAuxMemory->isEmpty()) {
 				memory = listAuxMemory->dequeue();
-				g->FillRectangle(sbFill, memory.getId() * 19 + 1, 1, 18, (17.6)*memory.getSize());
-				g->DrawString(process.getId().ToString(), this->Font, sbBlack, PointF(memory.getId() * 19 + 2, 40));
+				g->FillRectangle(sbFill, memory.getId() * 18 + 1, 1, 17, (17.6)*memory.getSize() + 1);
+				g->DrawString(process.getId().ToString(), this->Font, sbBlack, PointF(memory.getId() * 18 + 2, 40));
 				listInMemory->insertData(memory);
 			}
 			
@@ -1361,8 +1392,8 @@ namespace ProcesoPorLotes {
 			aux -= FRAME;
 			listInMemory->enqueue(memory);
 
-			g->FillRectangle(sbBlue, memory.getId() * 19 + 1, 1, 18, (17.6)*memory.getSize());
-			g->DrawString(process.getId().ToString(), this->Font, sbBlack, PointF(memory.getId() * 19 + 2, 40));
+			g->FillRectangle(sbBlue, memory.getId() * 18 + 1, 1, 17, (17.6)*memory.getSize() + 1);
+			g->DrawString(process.getId().ToString(), this->Font, sbBlack, PointF(memory.getId() * 18 + 2, 40));
 		}
 
 			
@@ -1379,8 +1410,8 @@ namespace ProcesoPorLotes {
 			
 			listOutMemory->insertData(memory);
 
-			g->DrawRectangle(p, memory.getId() * 19, 0, 19, 90);
-			g->FillRectangle(sbWhite, memory.getId() * 19 + 1, 1, 18, 88);
+			g->DrawRectangle(p, memory.getId() * 18, 0, 18, 90);
+			g->FillRectangle(sbWhite, memory.getId() * 18 + 1, 1, 17, 89);
 			//g->DrawString(process.getId().ToString(), this->Font, sbBlack, PointF(memory.getId() * 18 + 2, 40));
 
 		}
@@ -1429,16 +1460,21 @@ namespace ProcesoPorLotes {
 		Marshal::FreeHGlobal(IntPtr((void*)chars));
 	}
 
+	void saveToFile(Process process) {
+		std::fstream readerFile;
+		//readerFile.open(FILENAME,ios::in);
+	}
+
 	private: System::Void panel1_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e) {
 		Pen ^p = gcnew Pen(Color::Black);
 		//
 
 		for (int i(0), j(0); i < 36; i++) {
-			g->DrawRectangle(p, j, 0, 19, 90);
-			g->FillRectangle(sbWhite, j+1, 1, 18, 89);
-			j = j + 19;
+			g->DrawRectangle(p, j, 0, 18, 90);
+			g->FillRectangle(sbWhite, j+1, 1, 17, 89);
+			j = j + 18;
 		}
 	}
-
+	
 };
 }
