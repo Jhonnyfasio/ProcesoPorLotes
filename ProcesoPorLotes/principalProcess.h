@@ -1,5 +1,10 @@
 #pragma once
 
+#include <iostream>
+#include <cstring>
+#include <cstdlib>
+#include <cctype>
+#include <string>
 #include <time.h>
 #include <fstream>
 #include "programer.h"
@@ -10,7 +15,8 @@
 
 #define TOTAL_MEMORY 180
 #define FRAME 5
-#define FILENAME ""
+#define FILENAME "Suspendidos.txt"
+#define FILENAME_AUX "AuxSuspendidos.txt"
 
 namespace ProcesoPorLotes {
 	Process generalProcess;
@@ -45,6 +51,7 @@ namespace ProcesoPorLotes {
 		Collection<Process>* queueExecution = new Collection<Process>;
 		Collection<Process>* queueBlocked = new Collection<Process>;
 		Collection<Process>* queueFinished = new Collection<Process>;
+		Collection<Process>* queueSuspend = new Collection<Process>;
 		Collection<Memory>* listInMemory = new Collection<Memory>;
 		Collection<Memory>* listOutMemory = new Collection<Memory>;
 		Collection<Memory>* listAuxMemory = new Collection<Memory>;
@@ -89,6 +96,8 @@ namespace ProcesoPorLotes {
 	private: System::Windows::Forms::TextBox^  txtQuantum;
 	private: System::Windows::Forms::Label^  label15;
 	private: System::Windows::Forms::Label^  label11;
+	private: System::Windows::Forms::TextBox^  txtSuspend;
+	private: System::Windows::Forms::Label^  label16;
 
 	private: System::Windows::Forms::Label^  labelRestantTime;
 
@@ -179,6 +188,8 @@ namespace ProcesoPorLotes {
 			this->txtQuantum = (gcnew System::Windows::Forms::TextBox());
 			this->label15 = (gcnew System::Windows::Forms::Label());
 			this->label11 = (gcnew System::Windows::Forms::Label());
+			this->txtSuspend = (gcnew System::Windows::Forms::TextBox());
+			this->label16 = (gcnew System::Windows::Forms::Label());
 			this->SuspendLayout();
 			// 
 			// txtNProcess
@@ -214,7 +225,7 @@ namespace ProcesoPorLotes {
 			this->txtPending->Name = L"txtPending";
 			this->txtPending->ReadOnly = true;
 			this->txtPending->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
-			this->txtPending->Size = System::Drawing::Size(213, 153);
+			this->txtPending->Size = System::Drawing::Size(213, 228);
 			this->txtPending->TabIndex = 10;
 			// 
 			// txtProcess
@@ -233,7 +244,7 @@ namespace ProcesoPorLotes {
 			this->txtFinished->Name = L"txtFinished";
 			this->txtFinished->ReadOnly = true;
 			this->txtFinished->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
-			this->txtFinished->Size = System::Drawing::Size(213, 284);
+			this->txtFinished->Size = System::Drawing::Size(213, 359);
 			this->txtFinished->TabIndex = 12;
 			// 
 			// label5
@@ -403,7 +414,7 @@ namespace ProcesoPorLotes {
 			// 
 			// panelDrawing
 			// 
-			this->panelDrawing->Location = System::Drawing::Point(13, 358);
+			this->panelDrawing->Location = System::Drawing::Point(14, 430);
 			this->panelDrawing->Name = L"panelDrawing";
 			this->panelDrawing->Size = System::Drawing::Size(649, 91);
 			this->panelDrawing->TabIndex = 34;
@@ -414,7 +425,7 @@ namespace ProcesoPorLotes {
 			this->label12->AutoSize = true;
 			this->label12->Font = (gcnew System::Drawing::Font(L"Amiri Quran", 7, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
-			this->label12->Location = System::Drawing::Point(15, 344);
+			this->label12->Location = System::Drawing::Point(16, 416);
 			this->label12->Name = L"label12";
 			this->label12->Size = System::Drawing::Size(648, 13);
 			this->label12->TabIndex = 35;
@@ -472,11 +483,31 @@ namespace ProcesoPorLotes {
 			this->label11->TabIndex = 31;
 			this->label11->Text = L"Quantum";
 			// 
+			// txtSuspend
+			// 
+			this->txtSuspend->Location = System::Drawing::Point(233, 354);
+			this->txtSuspend->Multiline = true;
+			this->txtSuspend->Name = L"txtSuspend";
+			this->txtSuspend->ReadOnly = true;
+			this->txtSuspend->Size = System::Drawing::Size(213, 51);
+			this->txtSuspend->TabIndex = 41;
+			// 
+			// label16
+			// 
+			this->label16->AutoSize = true;
+			this->label16->Location = System::Drawing::Point(230, 338);
+			this->label16->Name = L"label16";
+			this->label16->Size = System::Drawing::Size(66, 13);
+			this->label16->TabIndex = 42;
+			this->label16->Text = L"Bloqueados:";
+			// 
 			// principalProcess
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(678, 455);
+			this->ClientSize = System::Drawing::Size(678, 530);
+			this->Controls->Add(this->label16);
+			this->Controls->Add(this->txtSuspend);
 			this->Controls->Add(this->label15);
 			this->Controls->Add(this->txtQuantum);
 			this->Controls->Add(this->label13);
@@ -1000,6 +1031,29 @@ namespace ProcesoPorLotes {
 
 		}
 
+		// Agregando a supendido desde bloqueado
+		if (!queueBlocked->isEmpty() && qGeneral == 4) {
+			process = queueBlocked->dequeue();
+
+			toErase = ("ID: " + process.getId().ToString() + "\r\nT Trans: 9\r\n")->Length;
+			//MessageBox::Show("A eliminar: " + toErase.ToString());
+			max = txtBlocked->Text->Length - toErase;
+			txtBlocked->Text = txtBlocked->Text->Substring(toErase, max);
+
+			txtPending->Text += "ID: " + process.getId() + "\r\nTME = " + process.getTme().ToString() + "\r\n" +
+				"T Rest: " + (process.getTme() - process.getTimeTrans()).ToString() + "\r\n";
+			clearMemory(process);
+			saveToFile(process);
+
+			queueSuspend->insertData(process);
+			txtSuspend->Text = "ID: " + process.getId() + "\r\nTamaño: " + process.getSize();
+			auxInt = process.getSize() / FRAME;
+			if (process.getSize() % FRAME != 0) {
+				auxInt++;
+			}
+			txtSuspend->Text += "\r\nMarcos: " + auxInt.ToString();
+		}
+
 		if (generalProcess.getId() == -1) {
 			labelTotalTime->Text = "0";
 			labelRestantTime->Text = "0";
@@ -1192,6 +1246,14 @@ namespace ProcesoPorLotes {
 			e->Handled = false;
 			//MessageBox::Show("N");
 		}
+	}
+	else if (ch == 'S') {
+		qGeneral = 4;
+		status = 2;
+	}
+	else if (ch == 'R') {
+		qGeneral = 5;
+		status = 2;
 	}
 	else if (ch == 8) {
 		//MessageBox::Show("Erase");
@@ -1462,7 +1524,101 @@ namespace ProcesoPorLotes {
 
 	void saveToFile(Process process) {
 		std::fstream readerFile;
-		//readerFile.open(FILENAME,ios::in);
+		readerFile.open(FILENAME,std::ios::app|std::ios::out);
+		if (!readerFile.is_open()) {
+			return;
+		}
+		readerFile << process.getId() << "°";
+		readerFile << process.getOperation().c_str() << "°";
+		readerFile << process.getSize() << "°" << process.getLocation() << "°" << process.getTme() << "°" << process.getTimeTrans() << "°"
+			<< process.getTimeLlegada() << "°" << process.getTimeFinalizacion() << "°" << process.getTimeServicio() << "°"
+			<< process.getTimeRespuesta() << "°" << process.getTimeBlocked() << "°" << process.getTimeEspera() << "°"
+			<< process.getIsError() << "°" << process.getResult() << "°";
+		
+		readerFile.close();
+	}
+
+	Process readAndDeleteFile() {
+		Process process;
+		std::fstream readerFile, readerFileAux;
+		std::string str1;
+		std::string str2, str3, str4, str5, str6, str7, str8, str9, str10, str11, str12, str13, str14;
+		readerFile.open(FILENAME,std::ios::in|std::ios::out);
+		readerFile.open(FILENAME_AUX, std::ios::trunc | std::ios::out);
+		if (!readerFile.is_open() || !readerFileAux.is_open()) {
+			return;
+		}
+		while (!readerFile.eof()) {
+			std::getline(readerFile, str1, '°');
+			if (!readerFile.eof()bb) {
+				process.setId(atoi(str1.c_str()));
+				std::getline(readerFile, str1, '°');
+				process.setOperation(str1);
+
+				std::getline(readerFile, str1, '°');
+				process.setSize(atoi(str1.c_str()));
+
+				std::getline(readerFile, str1, '°');
+				process.setLocation(atoi(str1.c_str()));
+
+				std::getline(readerFile, str1, '°');
+				process.setTme(atoi(str1.c_str()));
+
+				std::getline(readerFile, str1, '°');
+				process.setTimeTrans(atoi(str1.c_str()));
+
+				std::getline(readerFile, str1, '°');
+				process.setTimeLlegada(atoi(str1.c_str()));
+
+				std::getline(readerFile, str1, '°');
+				process.setTimeFinalizacion(atoi(str1.c_str()));
+
+				std::getline(readerFile, str1, '°');
+				process.setTimeServicio(atoi(str1.c_str()));
+
+				std::getline(readerFile, str1, '°');
+				process.setTimeRespuesta(atoi(str1.c_str()));
+
+				std::getline(readerFile, str1, '°');
+				process.setTimeBlocked(atoi(str1.c_str()));
+
+				std::getline(readerFile, str1, '°');
+				process.setTimeEspera(atoi(str1.c_str()));
+
+				std::getline(readerFile, str1, '°');
+				process.setIsError(false);
+
+				std::getline(readerFile, str1, '°');
+				process.setResult(atof(str1.c_str()));
+
+			}
+		}
+		readerFile.seekg(0, readerFile.beg);
+		while (!readerFile.eof()) {
+			std::getline(readerFile, str1, '°');
+			std::getline(readerFile, str2, '°');
+			std::getline(readerFile, str3, '°');
+			std::getline(readerFile, str4, '°');
+			std::getline(readerFile, str5, '°');
+			std::getline(readerFile, str6, '°');
+			std::getline(readerFile, str7, '°');
+			std::getline(readerFile, str8, '°');
+			std::getline(readerFile, str9, '°');
+			std::getline(readerFile, str10, '°');
+			std::getline(readerFile, str11, '°');
+			std::getline(readerFile, str12, '°');
+			std::getline(readerFile, str13, '°');
+			std::getline(readerFile, str14, '°');
+			if (!readerFile.eof() && atoi(str1.c_str()) != process.getId()) {
+				readerFileAux << str1 << "°" << str2 << "°" << str3 << "°" << str4 << "°" << str5 << "°" << str6 << "°" << str7 << "°"
+					<< str8 << "°" << str9 << "°" << str10 << "°" << str11 << "°" << str12 << "°" << str13 << "°" << str14 << "°";
+			}
+
+		}
+		readerFile.close();
+		readerFileAux.close();
+
+		return process;
 	}
 
 	private: System::Void panel1_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e) {
