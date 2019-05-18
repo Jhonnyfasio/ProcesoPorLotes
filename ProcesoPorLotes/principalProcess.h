@@ -111,6 +111,8 @@ namespace ProcesoPorLotes {
 				 //
 				 //TODO: agregar código de constructor aquí
 				 //
+				 remove(FILENAME);
+
 				 queueNews = new Collection<Process>;
 				 secondListData = new Collection<Process>;
 
@@ -1031,8 +1033,41 @@ namespace ProcesoPorLotes {
 
 		}
 
+		// Añadiendo a memoria desde suspendidos
+		if (!queueSuspend->isEmpty() && qGeneral == 5) {
+			//MessageBox::Show("Hi");
+			qGeneral = 0;
+			process = readFile();
+			auxInt = process.getSize() / FRAME;
+			if (process.getSize() % FRAME != 0) {
+				auxInt++;
+			}
+			//MessageBox::Show("Holi" + auxInt.ToString());
+			if (auxInt <= listOutMemory->getItemCounter()) {
+
+				queueReady->insertData(queueSuspend->dequeue());
+				if (!queueSuspend->isEmpty()) {
+					txtSuspend->Text = "ID: " + queueSuspend->getFront().getId() + "\r\nTamaño: " + queueSuspend->getFront().getSize();
+					auxInt = queueSuspend->getFront().getSize() / FRAME;
+					if (queueSuspend->getFront().getSize() % FRAME != 0) {
+						auxInt++;
+					}
+					txtSuspend->Text += "\r\nMarcos: " + auxInt.ToString();
+					}
+				else {
+					txtSuspend->Text = "";
+				}
+				actualizeTxtPending(process);
+				addToMemory(process);
+
+				deleteFile(process);
+			}
+			
+		}
+
 		// Agregando a supendido desde bloqueado
 		if (!queueBlocked->isEmpty() && qGeneral == 4) {
+			qGeneral = 0;
 			process = queueBlocked->dequeue();
 
 			toErase = ("ID: " + process.getId().ToString() + "\r\nT Trans: 9\r\n")->Length;
@@ -1040,15 +1075,13 @@ namespace ProcesoPorLotes {
 			max = txtBlocked->Text->Length - toErase;
 			txtBlocked->Text = txtBlocked->Text->Substring(toErase, max);
 
-			txtPending->Text += "ID: " + process.getId() + "\r\nTME = " + process.getTme().ToString() + "\r\n" +
-				"T Rest: " + (process.getTme() - process.getTimeTrans()).ToString() + "\r\n";
 			clearMemory(process);
 			saveToFile(process);
 
 			queueSuspend->insertData(process);
-			txtSuspend->Text = "ID: " + process.getId() + "\r\nTamaño: " + process.getSize();
-			auxInt = process.getSize() / FRAME;
-			if (process.getSize() % FRAME != 0) {
+			txtSuspend->Text = "ID: " + queueSuspend->getFront().getId() + "\r\nTamaño: " + queueSuspend->getFront().getSize();
+			auxInt = queueSuspend->getFront().getSize() / FRAME;
+			if (queueSuspend->getFront().getSize() % FRAME != 0) {
 				auxInt++;
 			}
 			txtSuspend->Text += "\r\nMarcos: " + auxInt.ToString();
@@ -1109,13 +1142,15 @@ namespace ProcesoPorLotes {
 			if(queueReady->isEmpty()){
 				if (queueNews->isEmpty()) {
 					if (queueBlocked->isEmpty()) {
-						generalProcess.setId(-1);
-						
-						labelTotalTime->Text = "0";
-						labelRestantTime->Text = "0";
-						labelQuantum->Text = "0";
-						labelOutMemory->Text = listOutMemory->getItemCounter().ToString();
-						timer1->Stop();
+						if (queueSuspend->isEmpty()) {
+							generalProcess.setId(-1);
+
+							labelTotalTime->Text = "0";
+							labelRestantTime->Text = "0";
+							labelQuantum->Text = "0";
+							labelOutMemory->Text = listOutMemory->getItemCounter().ToString();
+							timer1->Stop();
+						}
 					}
 				}
 			}
@@ -1250,10 +1285,14 @@ namespace ProcesoPorLotes {
 	else if (ch == 'S') {
 		qGeneral = 4;
 		status = 2;
+		txtStatus->Clear();
+		e->Handled = false;
 	}
 	else if (ch == 'R') {
 		qGeneral = 5;
 		status = 2;
+		txtStatus->Clear();
+		e->Handled = false;
 	}
 	else if (ch == 8) {
 		//MessageBox::Show("Erase");
@@ -1538,87 +1577,107 @@ namespace ProcesoPorLotes {
 		readerFile.close();
 	}
 
-	Process readAndDeleteFile() {
+	Process readFile() {
 		Process process;
 		std::fstream readerFile, readerFileAux;
 		std::string str1;
 		std::string str2, str3, str4, str5, str6, str7, str8, str9, str10, str11, str12, str13, str14;
 		readerFile.open(FILENAME,std::ios::in|std::ios::out);
-		readerFile.open(FILENAME_AUX, std::ios::trunc | std::ios::out);
-		if (!readerFile.is_open() || !readerFileAux.is_open()) {
-			return;
+		if (!readerFile.is_open()) {
+			MessageBox::Show("Error, no se pudo abrir el archivo de texto para lectura/escritura");
 		}
-		while (!readerFile.eof()) {
-			std::getline(readerFile, str1, '°');
-			if (!readerFile.eof()bb) {
-				process.setId(atoi(str1.c_str()));
+		else {
+			if (!readerFile.eof()) {
 				std::getline(readerFile, str1, '°');
-				process.setOperation(str1);
+				if (!readerFile.eof()) {
+					process.setId(atoi(str1.c_str()));
+					std::getline(readerFile, str1, '°');
+					process.setOperation(str1);
 
-				std::getline(readerFile, str1, '°');
-				process.setSize(atoi(str1.c_str()));
+					std::getline(readerFile, str1, '°');
+					process.setSize(atoi(str1.c_str()));
 
-				std::getline(readerFile, str1, '°');
-				process.setLocation(atoi(str1.c_str()));
+					std::getline(readerFile, str1, '°');
+					process.setLocation(atoi(str1.c_str()));
 
-				std::getline(readerFile, str1, '°');
-				process.setTme(atoi(str1.c_str()));
+					std::getline(readerFile, str1, '°');
+					process.setTme(atoi(str1.c_str()));
 
-				std::getline(readerFile, str1, '°');
-				process.setTimeTrans(atoi(str1.c_str()));
+					std::getline(readerFile, str1, '°');
+					process.setTimeTrans(atoi(str1.c_str()));
 
-				std::getline(readerFile, str1, '°');
-				process.setTimeLlegada(atoi(str1.c_str()));
+					std::getline(readerFile, str1, '°');
+					process.setTimeLlegada(atoi(str1.c_str()));
 
-				std::getline(readerFile, str1, '°');
-				process.setTimeFinalizacion(atoi(str1.c_str()));
+					std::getline(readerFile, str1, '°');
+					process.setTimeFinalizacion(atoi(str1.c_str()));
 
-				std::getline(readerFile, str1, '°');
-				process.setTimeServicio(atoi(str1.c_str()));
+					std::getline(readerFile, str1, '°');
+					process.setTimeServicio(atoi(str1.c_str()));
 
-				std::getline(readerFile, str1, '°');
-				process.setTimeRespuesta(atoi(str1.c_str()));
+					std::getline(readerFile, str1, '°');
+					process.setTimeRespuesta(atoi(str1.c_str()));
 
-				std::getline(readerFile, str1, '°');
-				process.setTimeBlocked(atoi(str1.c_str()));
+					std::getline(readerFile, str1, '°');
+					process.setTimeBlocked(atoi(str1.c_str()));
 
-				std::getline(readerFile, str1, '°');
-				process.setTimeEspera(atoi(str1.c_str()));
+					std::getline(readerFile, str1, '°');
+					process.setTimeEspera(atoi(str1.c_str()));
 
-				std::getline(readerFile, str1, '°');
-				process.setIsError(false);
+					std::getline(readerFile, str1, '°');
+					process.setIsError(false);
 
+					std::getline(readerFile, str1, '°');
+					process.setResult(atof(str1.c_str()));
+
+				}
+			}
+			readerFile.close();
+		
+			return process;
+		}
+	}
+
+	void deleteFile(Process process) {
+		std::fstream readerFile, readerFileAux;
+		std::string str1;
+		std::string str2, str3, str4, str5, str6, str7, str8, str9, str10, str11, str12, str13, str14;
+		readerFile.open(FILENAME, std::ios::in | std::ios::out);
+		readerFileAux.open(FILENAME_AUX, std::ios::trunc | std::ios::out);
+		if (!readerFile.is_open()) {
+			MessageBox::Show("Error, no se pudo abrir el archivo de texto para lectura/escritura");
+		}
+		else if (!readerFileAux.is_open()) {
+			MessageBox::Show("Error, no se puede abrir el archivo "+FILENAME_AUX);
+		}
+		else {
+			while (!readerFile.eof()) {
 				std::getline(readerFile, str1, '°');
-				process.setResult(atof(str1.c_str()));
+				std::getline(readerFile, str2, '°');
+				std::getline(readerFile, str3, '°');
+				std::getline(readerFile, str4, '°');
+				std::getline(readerFile, str5, '°');
+				std::getline(readerFile, str6, '°');
+				std::getline(readerFile, str7, '°');
+				std::getline(readerFile, str8, '°');
+				std::getline(readerFile, str9, '°');
+				std::getline(readerFile, str10, '°');
+				std::getline(readerFile, str11, '°');
+				std::getline(readerFile, str12, '°');
+				std::getline(readerFile, str13, '°');
+				std::getline(readerFile, str14, '°');
+				if (!readerFile.eof() && atoi(str1.c_str()) != process.getId()) {
+					readerFileAux << str1 << "°" << str2 << "°" << str3 << "°" << str4 << "°" << str5 << "°" << str6 << "°" << str7 << "°"
+						<< str8 << "°" << str9 << "°" << str10 << "°" << str11 << "°" << str12 << "°" << str13 << "°" << str14 << "°";
+				}
 
 			}
-		}
-		readerFile.seekg(0, readerFile.beg);
-		while (!readerFile.eof()) {
-			std::getline(readerFile, str1, '°');
-			std::getline(readerFile, str2, '°');
-			std::getline(readerFile, str3, '°');
-			std::getline(readerFile, str4, '°');
-			std::getline(readerFile, str5, '°');
-			std::getline(readerFile, str6, '°');
-			std::getline(readerFile, str7, '°');
-			std::getline(readerFile, str8, '°');
-			std::getline(readerFile, str9, '°');
-			std::getline(readerFile, str10, '°');
-			std::getline(readerFile, str11, '°');
-			std::getline(readerFile, str12, '°');
-			std::getline(readerFile, str13, '°');
-			std::getline(readerFile, str14, '°');
-			if (!readerFile.eof() && atoi(str1.c_str()) != process.getId()) {
-				readerFileAux << str1 << "°" << str2 << "°" << str3 << "°" << str4 << "°" << str5 << "°" << str6 << "°" << str7 << "°"
-					<< str8 << "°" << str9 << "°" << str10 << "°" << str11 << "°" << str12 << "°" << str13 << "°" << str14 << "°";
-			}
+			readerFile.close();
+			readerFileAux.close();
+			remove(FILENAME);
 
+			rename(FILENAME_AUX, FILENAME);
 		}
-		readerFile.close();
-		readerFileAux.close();
-
-		return process;
 	}
 
 	private: System::Void panel1_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e) {
