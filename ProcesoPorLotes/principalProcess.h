@@ -98,6 +98,8 @@ namespace ProcesoPorLotes {
 	private: System::Windows::Forms::Label^  label11;
 	private: System::Windows::Forms::TextBox^  txtSuspend;
 	private: System::Windows::Forms::Label^  label16;
+	private: System::Windows::Forms::Panel^  panel1;
+	private: System::Windows::Forms::Label^  label17;
 
 	private: System::Windows::Forms::Label^  labelRestantTime;
 
@@ -192,6 +194,8 @@ namespace ProcesoPorLotes {
 			this->label11 = (gcnew System::Windows::Forms::Label());
 			this->txtSuspend = (gcnew System::Windows::Forms::TextBox());
 			this->label16 = (gcnew System::Windows::Forms::Label());
+			this->panel1 = (gcnew System::Windows::Forms::Panel());
+			this->label17 = (gcnew System::Windows::Forms::Label());
 			this->SuspendLayout();
 			// 
 			// txtNProcess
@@ -425,11 +429,11 @@ namespace ProcesoPorLotes {
 			// label12
 			// 
 			this->label12->AutoSize = true;
-			this->label12->Font = (gcnew System::Drawing::Font(L"Amiri Quran", 7, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+			this->label12->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 7, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->label12->Location = System::Drawing::Point(16, 416);
 			this->label12->Name = L"label12";
-			this->label12->Size = System::Drawing::Size(648, 13);
+			this->label12->Size = System::Drawing::Size(649, 13);
 			this->label12->TabIndex = 35;
 			this->label12->Text = L"01  02  03  04  05  06  07  08  09  10  11  12  13  14  15  16  17  18  19  20  2"
 				L"1  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36";
@@ -499,15 +503,33 @@ namespace ProcesoPorLotes {
 			this->label16->AutoSize = true;
 			this->label16->Location = System::Drawing::Point(230, 338);
 			this->label16->Name = L"label16";
-			this->label16->Size = System::Drawing::Size(66, 13);
+			this->label16->Size = System::Drawing::Size(71, 13);
 			this->label16->TabIndex = 42;
-			this->label16->Text = L"Bloqueados:";
+			this->label16->Text = L"Suspendidos:";
+			// 
+			// panel1
+			// 
+			this->panel1->Location = System::Drawing::Point(14, 541);
+			this->panel1->Name = L"panel1";
+			this->panel1->Size = System::Drawing::Size(649, 91);
+			this->panel1->TabIndex = 35;
+			// 
+			// label17
+			// 
+			this->label17->AutoSize = true;
+			this->label17->Location = System::Drawing::Point(8, 525);
+			this->label17->Name = L"label17";
+			this->label17->Size = System::Drawing::Size(71, 13);
+			this->label17->TabIndex = 43;
+			this->label17->Text = L"Suspendidos:";
 			// 
 			// principalProcess
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(678, 530);
+			this->ClientSize = System::Drawing::Size(678, 644);
+			this->Controls->Add(this->label17);
+			this->Controls->Add(this->panel1);
 			this->Controls->Add(this->label16);
 			this->Controls->Add(this->txtSuspend);
 			this->Controls->Add(this->label15);
@@ -568,8 +590,8 @@ namespace ProcesoPorLotes {
 		}
 
 		marshalString(txtQuantum->Text, aux);
-		if ((auxInt = atoi(aux.c_str())) < 3) {
-			MessageBox::Show("Error, no se puede pedir menos de 3 de Quantum");
+		if ((auxInt = atoi(aux.c_str())) < 1) {
+			MessageBox::Show("Error, no se puede pedir menos de 1 de Quantum");
 			return;
 		}
 
@@ -1294,6 +1316,9 @@ namespace ProcesoPorLotes {
 		txtStatus->Clear();
 		e->Handled = false;
 	}
+	else if (ch == 'U') {
+	
+	}
 	else if (ch == 8) {
 		//MessageBox::Show("Erase");
 	}
@@ -1399,7 +1424,7 @@ namespace ProcesoPorLotes {
 		while (!queueAux->isEmpty()) {
 			queueExecution->insertData(process = queueAux->dequeue());
 
-			time = (generalWatch - process.getTimeLlegada());;
+			time = (generalWatch - process.getTimeLlegada());
 			auxString += "Número de programa: " + process.getId() +
 				"\r\nOperación: " + gcnew String(process.getOperation().c_str()) +
 				"\r\nResultado: N/A" +
@@ -1437,6 +1462,42 @@ namespace ProcesoPorLotes {
 				"\r\nTiempo de Espera: " + (time - process.getTimeServicio()).ToString() +
 				"\r\nTiempo de Servicio: " + process.getTimeServicio() +
 				"\r\n------------------------------------------------------------------\r\n";
+		}
+
+		auxString += "Procesos Suspendidos: " + queueSuspend->getItemCounter() + "\r\n";
+		auxString += "------------------------------------------------------------------\r\n";
+		while (!queueSuspend->isEmpty()) {
+			queueAux->insertData(queueSuspend->dequeue());
+		}
+		int auxInt;
+		while (!queueAux->isEmpty()) {
+			queueSuspend->insertData(process = queueAux->dequeue());
+			time = (generalWatch - process.getTimeLlegada());
+
+			auxString += "Número de programa: " + process.getId() + "\r\nTamaño: " + process.getSize();
+			auxInt = process.getSize() / FRAME;
+			if (process.getSize() % FRAME != 0) {
+				auxInt++;
+			}
+			auxString += "\r\nMarcos: " + auxInt.ToString();
+
+			auxString += "\r\nOperación: " + gcnew String(process.getOperation().c_str()) +
+				"\r\nResultado: N/A" +
+				"\r\nTME: " + process.getTme() +
+				"\r\n Tiempo de Llegada: " + process.getTimeLlegada() +
+				"\r\nTiempo de Finalizacion: N/A" +
+				"\r\nTiempo de Retorno: N/A";
+			if (process.getTimeRespuesta() == -1) {
+				auxString += "\r\nTiempo de Respuesta: N/A";
+			}
+			else {
+				auxString += "\r\nTiempo de Respuesta: " + process.getTimeRespuesta();
+			}
+
+			auxString += "\r\nTiempo de Espera: " + (time - process.getTimeServicio()).ToString() +
+				"\r\nTiempo de Servicio: " + process.getTimeServicio();
+
+			auxString+="\r\n------------------------------------------------------------------\r\n";
 		}
 
 		bcpForm = gcnew bcp(auxString);
