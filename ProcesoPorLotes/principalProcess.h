@@ -55,7 +55,10 @@ namespace ProcesoPorLotes {
 		Collection<Memory>* listInMemory = new Collection<Memory>;
 		Collection<Memory>* listOutMemory = new Collection<Memory>;
 		Collection<Memory>* listAuxMemory = new Collection<Memory>;
+		Collection<Memory>* listInVirtualMemory = new Collection <Memory>;
+		Collection<Memory>* listOutVirtualMemory = new Collection <Memory>;
 		Graphics ^g;
+		Graphics ^gVirtual;
 		SolidBrush ^sbYellow = gcnew SolidBrush(Color::Yellow);
 		SolidBrush ^sbGreen = gcnew SolidBrush(Color::Green);
 		SolidBrush ^sbOrange = gcnew SolidBrush(Color::Orange);
@@ -98,7 +101,8 @@ namespace ProcesoPorLotes {
 	private: System::Windows::Forms::Label^  label11;
 	private: System::Windows::Forms::TextBox^  txtSuspend;
 	private: System::Windows::Forms::Label^  label16;
-	private: System::Windows::Forms::Panel^  panel1;
+	private: System::Windows::Forms::Panel^  panelMemory;
+
 	private: System::Windows::Forms::Label^  label17;
 
 	private: System::Windows::Forms::Label^  labelRestantTime;
@@ -109,6 +113,8 @@ namespace ProcesoPorLotes {
 			 {
 				 InitializeComponent();
 				 g = panelDrawing->CreateGraphics();
+				 gVirtual = panelMemory->CreateGraphics();
+
 				 Memory memory;
 				 //
 				 //TODO: agregar código de constructor aquí
@@ -123,6 +129,7 @@ namespace ProcesoPorLotes {
 				 for(int i(0); i < 36; i++){
 					 memory.setId(i);
 					 listOutMemory->insertData(memory);
+					 listOutVirtualMemory->insertData(memory);
 				 }
 			 }
 
@@ -194,7 +201,7 @@ namespace ProcesoPorLotes {
 			this->label11 = (gcnew System::Windows::Forms::Label());
 			this->txtSuspend = (gcnew System::Windows::Forms::TextBox());
 			this->label16 = (gcnew System::Windows::Forms::Label());
-			this->panel1 = (gcnew System::Windows::Forms::Panel());
+			this->panelMemory = (gcnew System::Windows::Forms::Panel());
 			this->label17 = (gcnew System::Windows::Forms::Label());
 			this->SuspendLayout();
 			// 
@@ -429,11 +436,11 @@ namespace ProcesoPorLotes {
 			// label12
 			// 
 			this->label12->AutoSize = true;
-			this->label12->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 7, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+			this->label12->Font = (gcnew System::Drawing::Font(L"Amiri Quran", 7, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->label12->Location = System::Drawing::Point(16, 416);
 			this->label12->Name = L"label12";
-			this->label12->Size = System::Drawing::Size(649, 13);
+			this->label12->Size = System::Drawing::Size(648, 13);
 			this->label12->TabIndex = 35;
 			this->label12->Text = L"01  02  03  04  05  06  07  08  09  10  11  12  13  14  15  16  17  18  19  20  2"
 				L"1  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36";
@@ -507,29 +514,30 @@ namespace ProcesoPorLotes {
 			this->label16->TabIndex = 42;
 			this->label16->Text = L"Suspendidos:";
 			// 
-			// panel1
+			// panelMemory
 			// 
-			this->panel1->Location = System::Drawing::Point(14, 541);
-			this->panel1->Name = L"panel1";
-			this->panel1->Size = System::Drawing::Size(649, 91);
-			this->panel1->TabIndex = 35;
+			this->panelMemory->Location = System::Drawing::Point(15, 545);
+			this->panelMemory->Name = L"panelMemory";
+			this->panelMemory->Size = System::Drawing::Size(649, 91);
+			this->panelMemory->TabIndex = 35;
+			this->panelMemory->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &principalProcess::panelMemory_Paint);
 			// 
 			// label17
 			// 
 			this->label17->AutoSize = true;
-			this->label17->Location = System::Drawing::Point(8, 525);
+			this->label17->Location = System::Drawing::Point(13, 529);
 			this->label17->Name = L"label17";
-			this->label17->Size = System::Drawing::Size(71, 13);
+			this->label17->Size = System::Drawing::Size(82, 13);
 			this->label17->TabIndex = 43;
-			this->label17->Text = L"Suspendidos:";
+			this->label17->Text = L"Memoria Virtual:";
 			// 
 			// principalProcess
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(678, 644);
+			this->ClientSize = System::Drawing::Size(678, 646);
 			this->Controls->Add(this->label17);
-			this->Controls->Add(this->panel1);
+			this->Controls->Add(this->panelMemory);
 			this->Controls->Add(this->label16);
 			this->Controls->Add(this->txtSuspend);
 			this->Controls->Add(this->label15);
@@ -590,8 +598,8 @@ namespace ProcesoPorLotes {
 		}
 
 		marshalString(txtQuantum->Text, aux);
-		if ((auxInt = atoi(aux.c_str())) < 1) {
-			MessageBox::Show("Error, no se puede pedir menos de 1 de Quantum");
+		if ((auxInt = atoi(aux.c_str())) < 3) {
+			MessageBox::Show("Error, no se puede pedir menos de 3 de Quantum");
 			return;
 		}
 
@@ -881,6 +889,7 @@ namespace ProcesoPorLotes {
 	private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e) {
 		Collection<Process>* queueAux = new Collection<Process>;
 		Process process;
+		Memory memory;
 		bool space;
 		int time, auxInt;
 		int max, toErase;
@@ -897,7 +906,7 @@ namespace ProcesoPorLotes {
 		generalProcess.setTimeTrans((int)y);
 		generalProcess.setTimeServicio((int)y);
 
-		if(!queueExecution->isEmpty() && generalProcess.getId() != -1){
+		if (!queueExecution->isEmpty() && generalProcess.getId() != -1) {
 			queueExecution->dequeue();
 			queueExecution->insertData(generalProcess);
 		}
@@ -914,14 +923,14 @@ namespace ProcesoPorLotes {
 				auxInt++;
 			}
 		}
-		
+
 		// Añadiendo a memoria por espacio disponible
 		while (!queueNews->isEmpty() && auxInt <= listOutMemory->getItemCounter()) {
 			process = queueNews->dequeue();
 			process.setTimeLlegada(generalWatch);
 			//process.setTimeRespuesta(generalWatch);
 			labelNews->Text = (--intPublic).ToString();
-			
+
 			actualizeTxtPending(process);
 
 			queueReady->insertData(process);
@@ -942,7 +951,7 @@ namespace ProcesoPorLotes {
 			marshalString(labelNews->Text, toConver);
 
 			/*if (!queueNews->isEmpty()) {
-				
+
 			}*/
 
 			y = 0;
@@ -1015,6 +1024,11 @@ namespace ProcesoPorLotes {
 			actualizeMemory(process, sbBlue);
 
 			if (!queueReady->isEmpty()) {
+				process = queueReady->dequeue();
+
+				if (listInVirtualMemory->findIdProcessProcess(process.getId())) {
+					clearVirtualMemory(process);
+				}
 
 				generalProcess = queueReady->dequeue();
 
@@ -1031,19 +1045,19 @@ namespace ProcesoPorLotes {
 			quantumCounter = 0;
 		}
 
-		while(!queueBlocked->isEmpty()){
+		while (!queueBlocked->isEmpty()) {
 			process = queueBlocked->dequeue();
 			queueAux->insertData(process);
-			txtBlocked->Text += "ID: " + process.getId().ToString() + "\r\nT Trans: " + (generalWatch+9 - process.getTimeBlocked()).ToString() + "\r\n";
+			txtBlocked->Text += "ID: " + process.getId().ToString() + "\r\nT Trans: " + (generalWatch + 9 - process.getTimeBlocked()).ToString() + "\r\n";
 		}
-		
-		while(!queueAux->isEmpty()){
+
+		while (!queueAux->isEmpty()) {
 			queueBlocked->insertData(queueAux->dequeue());
 		}
-		
+
 		if (!queueBlocked->isEmpty() && queueBlocked->getFront().getTimeBlocked() == generalWatch) {
 			queueReady->insertData(process = queueBlocked->dequeue());
-			
+
 			toErase = ("ID: " + process.getId().ToString() + "\r\nT Trans: 9\r\n")->Length;
 			//MessageBox::Show("A eliminar: " + toErase.ToString());
 			max = txtBlocked->Text->Length - toErase;
@@ -1066,8 +1080,10 @@ namespace ProcesoPorLotes {
 			}
 			//MessageBox::Show("Holi" + auxInt.ToString());
 			if (auxInt <= listOutMemory->getItemCounter()) {
-
-				queueReady->insertData(queueSuspend->dequeue());
+				// En caso de error moverle aquí abajo
+				process = queueSuspend->dequeue();
+				process.setTimeBlocked(generalWatch + 9 - process.getTimeBlocked());
+				queueBlocked->insertData(process);
 				if (!queueSuspend->isEmpty()) {
 					txtSuspend->Text = "ID: " + queueSuspend->getFront().getId() + "\r\nTamaño: " + queueSuspend->getFront().getSize();
 					auxInt = queueSuspend->getFront().getSize() / FRAME;
@@ -1075,22 +1091,24 @@ namespace ProcesoPorLotes {
 						auxInt++;
 					}
 					txtSuspend->Text += "\r\nMarcos: " + auxInt.ToString();
-					}
+				}
 				else {
 					txtSuspend->Text = "";
 				}
-				actualizeTxtPending(process);
+				txtBlocked->Text += "ID: " + process.getId().ToString() + "\r\nT Trans: " + (generalWatch + 9 - process.getTimeBlocked()).ToString() + "\r\n";
+
 				addToMemory(process);
 
 				deleteFile(process);
 			}
-			
+
 		}
 
 		// Agregando a supendido desde bloqueado
 		if (!queueBlocked->isEmpty() && qGeneral == 4) {
 			qGeneral = 0;
 			process = queueBlocked->dequeue();
+			process.setTimeBlocked(generalWatch + 9 - process.getTimeBlocked());
 
 			toErase = ("ID: " + process.getId().ToString() + "\r\nT Trans: 9\r\n")->Length;
 			//MessageBox::Show("A eliminar: " + toErase.ToString());
@@ -1107,6 +1125,26 @@ namespace ProcesoPorLotes {
 				auxInt++;
 			}
 			txtSuspend->Text += "\r\nMarcos: " + auxInt.ToString();
+		}
+
+		// Agregando a memoria virtual desde memoria principal
+		if (!listOutVirtualMemory->isEmpty() && qGeneral == 6) {
+			qGeneral = 0;
+			while (!queueReady->isEmpty()) {
+				queueAux->insertData(queueReady->dequeue());
+			}
+			while (!queueAux->isEmpty()) {
+				queueReady->insertData(process = queueAux->dequeue());
+				addToVirtualMemory(process);
+			}
+
+			while (!queueBlocked->isEmpty()) {
+				queueAux->insertData(queueBlocked->dequeue());
+			}
+			while (!queueAux->isEmpty()) {
+				queueBlocked->insertData(process = queueAux->dequeue());
+				addToVirtualMemory(process);
+			}
 		}
 
 		if (generalProcess.getId() == -1) {
@@ -1317,7 +1355,10 @@ namespace ProcesoPorLotes {
 		e->Handled = false;
 	}
 	else if (ch == 'U') {
-	
+		qGeneral = 6;
+		status = 2;
+		txtStatus->Clear();
+		e->Handled = false;
 	}
 	else if (ch == 8) {
 		//MessageBox::Show("Erase");
@@ -1424,7 +1465,7 @@ namespace ProcesoPorLotes {
 		while (!queueAux->isEmpty()) {
 			queueExecution->insertData(process = queueAux->dequeue());
 
-			time = (generalWatch - process.getTimeLlegada());
+			time = (generalWatch - process.getTimeLlegada());;
 			auxString += "Número de programa: " + process.getId() +
 				"\r\nOperación: " + gcnew String(process.getOperation().c_str()) +
 				"\r\nResultado: N/A" +
@@ -1462,42 +1503,6 @@ namespace ProcesoPorLotes {
 				"\r\nTiempo de Espera: " + (time - process.getTimeServicio()).ToString() +
 				"\r\nTiempo de Servicio: " + process.getTimeServicio() +
 				"\r\n------------------------------------------------------------------\r\n";
-		}
-
-		auxString += "Procesos Suspendidos: " + queueSuspend->getItemCounter() + "\r\n";
-		auxString += "------------------------------------------------------------------\r\n";
-		while (!queueSuspend->isEmpty()) {
-			queueAux->insertData(queueSuspend->dequeue());
-		}
-		int auxInt;
-		while (!queueAux->isEmpty()) {
-			queueSuspend->insertData(process = queueAux->dequeue());
-			time = (generalWatch - process.getTimeLlegada());
-
-			auxString += "Número de programa: " + process.getId() + "\r\nTamaño: " + process.getSize();
-			auxInt = process.getSize() / FRAME;
-			if (process.getSize() % FRAME != 0) {
-				auxInt++;
-			}
-			auxString += "\r\nMarcos: " + auxInt.ToString();
-
-			auxString += "\r\nOperación: " + gcnew String(process.getOperation().c_str()) +
-				"\r\nResultado: N/A" +
-				"\r\nTME: " + process.getTme() +
-				"\r\n Tiempo de Llegada: " + process.getTimeLlegada() +
-				"\r\nTiempo de Finalizacion: N/A" +
-				"\r\nTiempo de Retorno: N/A";
-			if (process.getTimeRespuesta() == -1) {
-				auxString += "\r\nTiempo de Respuesta: N/A";
-			}
-			else {
-				auxString += "\r\nTiempo de Respuesta: " + process.getTimeRespuesta();
-			}
-
-			auxString += "\r\nTiempo de Espera: " + (time - process.getTimeServicio()).ToString() +
-				"\r\nTiempo de Servicio: " + process.getTimeServicio();
-
-			auxString+="\r\n------------------------------------------------------------------\r\n";
 		}
 
 		bcpForm = gcnew bcp(auxString);
@@ -1579,6 +1584,81 @@ namespace ProcesoPorLotes {
 		}
 
 
+	}
+
+	void addToVirtualMemory(Process process) {
+		int auxInt(0), counter(0);
+		Memory memory, auxMemory;
+		if (listInMemory->findIdProcessProcess(process.getId()) && !listOutVirtualMemory->isEmpty()) {
+			while (listInMemory->findIdProcessProcess(process.getId())) {
+				listAuxMemory->insertData(listInMemory->retrieveData(listInMemory->findIdProcessProcessNode(process.getId())));
+				listInMemory->deleteData(listInMemory->findIdProcessProcessNode(process.getId()));
+				auxInt++;
+			}
+
+			while (!listAuxMemory->isEmpty() && counter < auxInt - 1) {
+				memory = listAuxMemory->dequeue();
+				//MessageBox::Show("HI");
+				listInMemory->insertData(memory);
+				counter++;
+			}
+			//MessageBox::Show("HI: " + auxInt + "\r\nBool: " + listAuxMemory->isEmpty().ToString() + "\r\nBool2: " + listOutVirtualMemory->isEmpty().ToString());
+			if (auxInt >= 2 && !listAuxMemory->isEmpty() && !listOutVirtualMemory->isEmpty()) {
+				//MessageBox::Show("HI3");
+				auxMemory = listOutVirtualMemory->dequeue();
+				memory = listAuxMemory->dequeue();
+				listOutMemory->insertData(memory);
+				g->FillRectangle(sbWhite, memory.getId() * 18 + 1, 1, 17, (17.6)*memory.getSize() + 1);
+
+				memory.setId(auxMemory.getId());
+				gVirtual->FillRectangle(sbBlue, memory.getId() * 18 + 1, 1, 17, (17.6)*memory.getSize() + 1);
+				gVirtual->DrawString(process.getId().ToString(), this->Font, sbBlack, PointF(memory.getId() * 18 + 2, 40));
+			}
+		}
+	}
+
+	void clearVirtualMemory(Process process) {
+		Pen ^p = gcnew Pen(Color::Black);
+		Memory memory;
+		int auxId, aux;
+
+		while (!listInVirtualMemory->isEmpty() && listInVirtualMemory->findIdProcessProcess(process.getId())) {
+			memory = listInVirtualMemory->retrieveData(listInVirtualMemory->findIdProcessProcessNode(process.getId()));
+			listInVirtualMemory->deleteData(listInVirtualMemory->findIdProcessProcessNode(process.getId()));
+
+			listOutMemory->insertData(memory);
+
+			gVirtual->DrawRectangle(p, memory.getId() * 18, 0, 18, 90);
+			gVirtual->FillRectangle(sbWhite, memory.getId() * 18 + 1, 1, 17, 89);
+
+			while (!listOutMemory->isEmpty()) {
+				listOutMemory->dequeue();
+				listInMemory->insertData(memory);
+
+				g->FillRectangle(sbBlue, memory.getId() * 18 + 1, 1, 17, (17.6)*memory.getSize() + 1);
+				g->DrawString(process.getId().ToString(), this->Font, sbBlack, PointF(memory.getId() * 18 + 2, 40));
+			}
+			//g->DrawString(process.getId().ToString(), this->Font, sbBlack, PointF(memory.getId() * 18 + 2, 40));
+
+		}
+
+
+	}
+
+	int calculateFrameInVirtual(Process process) {
+		Memory memory;
+		int auxInt(0);
+		while (!listInVirtualMemory->isEmpty() && listInVirtualMemory->findIdProcessProcess(process.getId())) {
+			listAuxMemory->insertData(listInVirtualMemory->dequeue());
+		}
+		if (!listAuxMemory->isEmpty()) {
+			auxInt = listAuxMemory->getItemCounter();
+		}
+		while (!listAuxMemory->isEmpty()) {
+			listInVirtualMemory->insertData(listAuxMemory->dequeue());
+		}
+		
+		return auxInt;
 	}
 
 	int calculateSize(Process process) {
@@ -1752,5 +1832,15 @@ namespace ProcesoPorLotes {
 		}
 	}
 	
+	private: System::Void panelMemory_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e) {
+		Pen ^p = gcnew Pen(Color::Black);
+		//
+
+		for (int i(0), j(0); i < 36; i++) {
+			gVirtual->DrawRectangle(p, j, 0, 18, 90);
+			gVirtual->FillRectangle(sbWhite, j + 1, 1, 17, 89);
+			j = j + 18;
+		}
+}
 };
 }
