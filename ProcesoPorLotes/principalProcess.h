@@ -1025,12 +1025,12 @@ namespace ProcesoPorLotes {
 
 			if (!queueReady->isEmpty()) {
 				process = queueReady->dequeue();
-
+				
 				if (listInVirtualMemory->findIdProcessProcess(process.getId())) {
 					clearVirtualMemory(process);
 				}
 
-				generalProcess = queueReady->dequeue();
+				generalProcess = process;
 
 				if (generalProcess.getTimeRespuesta() == -1) {
 					//MessageBox::Show("ID:" + generalProcess.getId() + "\r\nRespuesta: " + (generalWatch - generalProcess.getTimeLlegada()));
@@ -1608,6 +1608,7 @@ namespace ProcesoPorLotes {
 				auxMemory = listOutVirtualMemory->dequeue();
 				memory = listAuxMemory->dequeue();
 				listOutMemory->insertData(memory);
+				listInVirtualMemory->insertData(memory);
 				g->FillRectangle(sbWhite, memory.getId() * 18 + 1, 1, 17, (17.6)*memory.getSize() + 1);
 
 				memory.setId(auxMemory.getId());
@@ -1619,20 +1620,20 @@ namespace ProcesoPorLotes {
 
 	void clearVirtualMemory(Process process) {
 		Pen ^p = gcnew Pen(Color::Black);
-		Memory memory;
+		Memory memory, auxMemory;
 		int auxId, aux;
 
 		while (!listInVirtualMemory->isEmpty() && listInVirtualMemory->findIdProcessProcess(process.getId())) {
 			memory = listInVirtualMemory->retrieveData(listInVirtualMemory->findIdProcessProcessNode(process.getId()));
 			listInVirtualMemory->deleteData(listInVirtualMemory->findIdProcessProcessNode(process.getId()));
 
-			listOutMemory->insertData(memory);
+			listOutVirtualMemory->insertData(memory);
 
 			gVirtual->DrawRectangle(p, memory.getId() * 18, 0, 18, 90);
 			gVirtual->FillRectangle(sbWhite, memory.getId() * 18 + 1, 1, 17, 89);
 
 			while (!listOutMemory->isEmpty()) {
-				listOutMemory->dequeue();
+				auxMemory = listOutMemory->dequeue();
 				listInMemory->insertData(memory);
 
 				g->FillRectangle(sbBlue, memory.getId() * 18 + 1, 1, 17, (17.6)*memory.getSize() + 1);
