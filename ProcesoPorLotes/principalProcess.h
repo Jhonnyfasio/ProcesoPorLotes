@@ -104,6 +104,8 @@ namespace ProcesoPorLotes {
 	private: System::Windows::Forms::Panel^  panelMemory;
 
 	private: System::Windows::Forms::Label^  label17;
+	private: System::Windows::Forms::Label^  labelInVirtualMemory;
+	private: System::Windows::Forms::Label^  labelCounter;
 
 	private: System::Windows::Forms::Label^  labelRestantTime;
 
@@ -203,6 +205,8 @@ namespace ProcesoPorLotes {
 			this->label16 = (gcnew System::Windows::Forms::Label());
 			this->panelMemory = (gcnew System::Windows::Forms::Panel());
 			this->label17 = (gcnew System::Windows::Forms::Label());
+			this->labelInVirtualMemory = (gcnew System::Windows::Forms::Label());
+			this->labelCounter = (gcnew System::Windows::Forms::Label());
 			this->SuspendLayout();
 			// 
 			// txtNProcess
@@ -531,11 +535,31 @@ namespace ProcesoPorLotes {
 			this->label17->TabIndex = 43;
 			this->label17->Text = L"Memoria Virtual:";
 			// 
+			// labelInVirtualMemory
+			// 
+			this->labelInVirtualMemory->AutoSize = true;
+			this->labelInVirtualMemory->Location = System::Drawing::Point(113, 529);
+			this->labelInVirtualMemory->Name = L"labelInVirtualMemory";
+			this->labelInVirtualMemory->Size = System::Drawing::Size(13, 13);
+			this->labelInVirtualMemory->TabIndex = 44;
+			this->labelInVirtualMemory->Text = L"0";
+			// 
+			// labelCounter
+			// 
+			this->labelCounter->AutoSize = true;
+			this->labelCounter->Location = System::Drawing::Point(354, 524);
+			this->labelCounter->Name = L"labelCounter";
+			this->labelCounter->Size = System::Drawing::Size(13, 13);
+			this->labelCounter->TabIndex = 45;
+			this->labelCounter->Text = L"0";
+			// 
 			// principalProcess
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(678, 646);
+			this->Controls->Add(this->labelCounter);
+			this->Controls->Add(this->labelInVirtualMemory);
 			this->Controls->Add(this->label17);
 			this->Controls->Add(this->panelMemory);
 			this->Controls->Add(this->label16);
@@ -772,7 +796,7 @@ namespace ProcesoPorLotes {
 		actualizeMemory(generalProcess, sbGreen);
 
 		labelNews->Text = intPublic.ToString();
-		timer1->Interval = 500;
+		timer1->Interval = 1000;
 		timer1->Start();
 	}
 
@@ -1005,7 +1029,10 @@ namespace ProcesoPorLotes {
 				queueExecution->insertData(generalProcess);
 				/*txtProcess->Text = "ID: " + generalProcess.getId().ToString() + "\r\nTiempo Trans: " + generalProcess.getTimeTrans().ToString() +
 					"\r\nTiempo Restante: " + (generalProcess.getTme() - generalProcess.getTimeTrans()).ToString() + "\r\n";*/
-
+				
+				if (listInVirtualMemory->findIdProcessProcess(generalProcess.getId())) {
+					clearVirtualMemory(generalProcess);
+				}
 				actualizeTxtProcess(generalProcess);
 				actualizeMemory(generalProcess, sbGreen);
 			}
@@ -1028,6 +1055,9 @@ namespace ProcesoPorLotes {
 				
 				if (listInVirtualMemory->findIdProcessProcess(process.getId())) {
 					clearVirtualMemory(process);
+				}
+				else {
+					//MessageBox::Show("Dentro de memoria virtual no encontrado");
 				}
 
 				generalProcess = process;
@@ -1209,6 +1239,7 @@ namespace ProcesoPorLotes {
 							labelRestantTime->Text = "0";
 							labelQuantum->Text = "0";
 							labelOutMemory->Text = listOutMemory->getItemCounter().ToString();
+							labelInVirtualMemory->Text = listInVirtualMemory->getItemCounter().ToString();
 							timer1->Stop();
 						}
 					}
@@ -1236,6 +1267,7 @@ namespace ProcesoPorLotes {
 			labelQuantum->Text = quantumCounter.ToString();
 			qGeneral = 0;
 			labelOutMemory->Text = listOutMemory->getItemCounter().ToString();
+			labelInVirtualMemory->Text = listInVirtualMemory->getItemCounter().ToString();
 		}
 
 		if (!queueNews->isEmpty()) {
@@ -1589,6 +1621,9 @@ namespace ProcesoPorLotes {
 	void addToVirtualMemory(Process process) {
 		int auxInt(0), counter(0);
 		Memory memory, auxMemory;
+
+		auxInt = 0;
+		counter = 0;
 		if (listInMemory->findIdProcessProcess(process.getId()) && !listOutVirtualMemory->isEmpty()) {
 			while (listInMemory->findIdProcessProcess(process.getId())) {
 				listAuxMemory->insertData(listInMemory->retrieveData(listInMemory->findIdProcessProcessNode(process.getId())));
@@ -1603,15 +1638,18 @@ namespace ProcesoPorLotes {
 				counter++;
 			}
 			//MessageBox::Show("HI: " + auxInt + "\r\nBool: " + listAuxMemory->isEmpty().ToString() + "\r\nBool2: " + listOutVirtualMemory->isEmpty().ToString());
+			if (listAuxMemory->getTop().getIdProcess() == 5) {
+				labelCounter->Text = auxInt.ToString();
+			}
 			if (auxInt >= 2 && !listAuxMemory->isEmpty() && !listOutVirtualMemory->isEmpty()) {
 				//MessageBox::Show("HI3");
 				auxMemory = listOutVirtualMemory->dequeue();
 				memory = listAuxMemory->dequeue();
 				listOutMemory->insertData(memory);
-				listInVirtualMemory->insertData(memory);
-				g->FillRectangle(sbWhite, memory.getId() * 18 + 1, 1, 17, (17.6)*memory.getSize() + 1);
+				g->FillRectangle(sbWhite, memory.getId() * 18 + 1, 1, 17, 89);
 
 				memory.setId(auxMemory.getId());
+				listInVirtualMemory->insertData(memory);
 				gVirtual->FillRectangle(sbBlue, memory.getId() * 18 + 1, 1, 17, (17.6)*memory.getSize() + 1);
 				gVirtual->DrawString(process.getId().ToString(), this->Font, sbBlack, PointF(memory.getId() * 18 + 2, 40));
 			}
@@ -1630,15 +1668,27 @@ namespace ProcesoPorLotes {
 			listOutVirtualMemory->insertData(memory);
 
 			gVirtual->DrawRectangle(p, memory.getId() * 18, 0, 18, 90);
-			gVirtual->FillRectangle(sbWhite, memory.getId() * 18 + 1, 1, 17, 89);
+			gVirtual->FillRectangle(sbOrange, memory.getId() * 18 + 1, 1, 17, 89);
 
-			while (!listOutMemory->isEmpty()) {
+			if (!listOutMemory->isEmpty()) {
 				auxMemory = listOutMemory->dequeue();
+				memory.setId(auxMemory.getId());
 				listInMemory->insertData(memory);
 
 				g->FillRectangle(sbBlue, memory.getId() * 18 + 1, 1, 17, (17.6)*memory.getSize() + 1);
 				g->DrawString(process.getId().ToString(), this->Font, sbBlack, PointF(memory.getId() * 18 + 2, 40));
 			}
+			else {
+				MessageBox::Show("Fuera de memroia principal vacía");
+			}
+
+			/*while (!listOutMemory->isEmpty()) {
+				auxMemory = listOutMemory->dequeue();
+				listInMemory->insertData(memory);
+
+				g->FillRectangle(sbBlue, memory.getId() * 18 + 1, 1, 17, (17.6)*memory.getSize() + 1);
+				g->DrawString(process.getId().ToString(), this->Font, sbBlack, PointF(memory.getId() * 18 + 2, 40));
+			}*/
 			//g->DrawString(process.getId().ToString(), this->Font, sbBlack, PointF(memory.getId() * 18 + 2, 40));
 
 		}
