@@ -1052,13 +1052,6 @@ namespace ProcesoPorLotes {
 
 			if (!queueReady->isEmpty()) {
 				process = queueReady->dequeue();
-				
-				if (listInVirtualMemory->findIdProcessProcess(process.getId())) {
-					clearVirtualMemory(process);
-				}
-				else {
-					//MessageBox::Show("Dentro de memoria virtual no encontrado");
-				}
 
 				generalProcess = process;
 
@@ -1071,6 +1064,12 @@ namespace ProcesoPorLotes {
 
 				actualizeTxtProcess(generalProcess);
 				actualizeMemory(generalProcess, sbGreen);
+
+				if (listInVirtualMemory->findIdProcessProcess(generalProcess.getId())) {
+					clearVirtualMemory(generalProcess);
+				}
+				actualizeMemory(generalProcess, sbGreen);
+				
 			}
 			quantumCounter = 0;
 		}
@@ -1085,7 +1084,7 @@ namespace ProcesoPorLotes {
 			queueBlocked->insertData(queueAux->dequeue());
 		}
 
-		if (!queueBlocked->isEmpty() && queueBlocked->getFront().getTimeBlocked() >= generalWatch) {
+		if (!queueBlocked->isEmpty() && queueBlocked->getFront().getTimeBlocked() <= generalWatch) {
 			queueReady->insertData(process = queueBlocked->dequeue());
 
 			toErase = ("ID: " + process.getId().ToString() + "\r\nT Trans: 9\r\n")->Length;
@@ -1666,6 +1665,7 @@ namespace ProcesoPorLotes {
 	void clearVirtualMemory(Process process) {
 		Pen ^p = gcnew Pen(Color::Black);
 		Memory memory, auxMemory;
+		Process respProcess;
 		int auxId, aux;
 		bool toDelete = false;
 
@@ -1691,6 +1691,10 @@ namespace ProcesoPorLotes {
 				//MessageBox::Show("Fuera de memroia principal vacía");
 			}
 		}
+		if (generalProcess.getId() == process.getId()) {
+			actualizeMemory(process, sbGreen);
+		}
+
 		if (toDelete) {
 			int time;
 			y = 0;
@@ -1717,7 +1721,9 @@ namespace ProcesoPorLotes {
 			clearMemory(process);
 			queueFinished->insertData(process);
 
-			while (!queueNews->isEmpty() && calculateSize(queueNews->getFront()) <= listOutMemory->getItemCounter()) {
+			generalProcess.setId(-1);
+
+			/*while (!queueNews->isEmpty() && calculateSize(queueNews->getFront()) <= listOutMemory->getItemCounter()) {
 				labelNews->Text = (--intPublic).ToString();
 				process = queueNews->dequeue();
 				process.setTimeLlegada(generalWatch);
@@ -1725,7 +1731,7 @@ namespace ProcesoPorLotes {
 				actualizeTxtPending(process);
 				//actualizeMemory(process, sbBlue);
 				addToMemory(process);
-			}
+			}*/
 
 			if (!queueReady->isEmpty()) {
 				generalProcess = queueReady->dequeue();
@@ -1737,14 +1743,14 @@ namespace ProcesoPorLotes {
 				}
 
 				queueExecution->insertData(generalProcess);
-				/*txtProcess->Text = "ID: " + generalProcess.getId().ToString() + "\r\nTiempo Trans: " + generalProcess.getTimeTrans().ToString() +
-					"\r\nTiempo Restante: " + (generalProcess.getTme() - generalProcess.getTimeTrans()).ToString() + "\r\n";*/
+				actualizeTxtProcess(generalProcess);
 
 				if (listInVirtualMemory->findIdProcessProcess(generalProcess.getId())) {
 					clearVirtualMemory(generalProcess);
 				}
-				actualizeTxtProcess(generalProcess);
+				
 				actualizeMemory(generalProcess, sbGreen);
+				//MessageBox::Show("Proceso: " + generalProcess.getId());
 			}
 			else {
 				txtProcess->Text = "";
@@ -1752,14 +1758,6 @@ namespace ProcesoPorLotes {
 
 			}
 		}
-		/*while (!listOutMemory->isEmpty()) {
-			auxMemory = listOutMemory->dequeue();
-			listInMemory->insertData(memory);
-
-			g->FillRectangle(sbBlue, memory.getId() * 18 + 1, 1, 17, (17.6)*memory.getSize() + 1);
-			g->DrawString(process.getId().ToString(), this->Font, sbBlack, PointF(memory.getId() * 18 + 2, 40));
-		}*/
-		//g->DrawString(process.getId().ToString(), this->Font, sbBlack, PointF(memory.getId() * 18 + 2, 40));
 	}
 
 	void deleteVirtualMemory(Process process) {
@@ -1774,7 +1772,7 @@ namespace ProcesoPorLotes {
 			listOutVirtualMemory->insertData(memory);
 
 			gVirtual->DrawRectangle(p, memory.getId() * 18, 0, 18, 90);
-			gVirtual->FillRectangle(sbOrange, memory.getId() * 18 + 1, 1, 17, 89);
+			gVirtual->FillRectangle(sbWhite, memory.getId() * 18 + 1, 1, 17, 89);
 
 		}
 
